@@ -1,13 +1,13 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: py-hello-world
+  name: py-helloworld
 spec:
   replicas: 1
   template:
     metadata:
       labels:
-        run: py-hello-world
+        run: py-helloworld
     spec:
       containers:
       - name: jarvis-kube-py-helloworld

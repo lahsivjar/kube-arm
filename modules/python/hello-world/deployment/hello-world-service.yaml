@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: py-hello-world
+  name: py-helloworld
 spec:
   selector:
-    run: py-hello-world
+    run: py-helloworld
   ports:
   - protocol: TCP
     port: 8080

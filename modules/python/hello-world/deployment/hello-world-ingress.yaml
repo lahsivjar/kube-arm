@@ -1,12 +1,12 @@
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
-  name: py-hello-world
+  name: py-helloworld
 spec:
   rules:
   - http:
       paths:
       - path: /py/helloworld
         backend:
-          serviceName: py-hello-world
+          serviceName: py-helloworld
           servicePort: 8080
