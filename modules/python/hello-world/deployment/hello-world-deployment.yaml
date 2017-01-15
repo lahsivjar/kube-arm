@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: py-hello-world
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: py-hello-world
+    spec:
+      containers:
+      - name: jarvis-kube-py-helloworld
+        image: lahsivjar/jarvis-kube-py-helloworld:latest
+        ports:
+        - containerPort: 8080
