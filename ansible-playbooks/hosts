@@ -1,0 +1,8 @@
+# Sample hosts file
+[jarvis-kube-master]
+jarvis ansible_host=192.168.1.14 ansible_user=jarvis
+
+[jarvis-kube-workers]
+aquaman ansible_host=192.168.1.11 ansible_user=aquaman
+blackpanther ansible_host=192.168.1.13 ansible_user=blackpanther
+
