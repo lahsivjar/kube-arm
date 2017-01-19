@@ -1,0 +1,16 @@
+---
+- name: "Shutdown slave nodes"
+  hosts: jarvis-kube-workers
+  become: true
+  become_method: sudo
+  tasks:
+  - name: "Halt now"
+    command: shutdown -h now
+
+- name: "Shutdown master node"
+  hosts: jarvis-kube-master
+  become: true
+  become_method: sudo
+  tasks:
+  - name: "Halt now"
+    command: shutdown -h now

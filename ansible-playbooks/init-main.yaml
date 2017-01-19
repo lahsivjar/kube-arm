@@ -1,0 +1,3 @@
+# Launches all plays that needs to be executed in order to make the cluster usable
+- include: ./tasks/kube-init.yaml
+- include: ./tasks/pod-flannel-init.yaml
