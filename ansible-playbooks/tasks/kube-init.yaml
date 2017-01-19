@@ -18,8 +18,8 @@
   become: true
   become_method: sudo
   vars:
-    kube_join_token: {{ hostvars['jarvis']['kube_join_token'].stdout }}
-    master_ip_address: {{ hostvars['jarvis']['master_ip_address'] }}
+    kube_join_token: "{{ hostvars['jarvis']['kube_join_token'].stdout }}"
+    master_ip_address: "{{ hostvars['jarvis']['master_ip_address'] }}"
   tasks:
   - name: "Join master node with the generated token."
     command: kubeadm join --token={{ kube_join_token }} {{ master_ip_address }}
