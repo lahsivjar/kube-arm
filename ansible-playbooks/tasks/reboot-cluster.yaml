@@ -1,0 +1,16 @@
+---
+- name: "Reboot slave nodes"
+  hosts: jarvis-kube-workers
+  become: true
+  become_method: sudo
+  tasks:
+  - name: "Reboot after 2 minutes"
+    command: shutdown -r +2 "Server reboot initiated in 120 seconds"
+
+- name: "Reboot master node"
+  hosts: jarvis-kube-master
+  become: true
+  become_method: sudo
+  tasks:
+  - name: "Reboot after 2 minutes"
+    command: shutdown -r +2 "Server reboot initiated in 120 seconds"

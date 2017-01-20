@@ -4,7 +4,7 @@
   become: true
   become_method: sudo
   tasks:
-  - name: "Halt now"
+  - name: "Halt after 1 minute"
     command: shutdown -h +1 "Server shutdown initiated, will shutdown in 60 seconds"
 
 - name: "Shutdown master node"
@@ -12,5 +12,5 @@
   become: true
   become_method: sudo
   tasks:
-  - name: "Halt now"
+  - name: "Halt after 1 minute"
     command: shutdown -h +1 "Server shutdown initiated, will shutdown in 60 seconds"
