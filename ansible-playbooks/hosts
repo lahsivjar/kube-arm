@@ -1,11 +1,14 @@
 # Sample hosts file
 [jarvis-kube-master]
-jarvis ansible_host=192.168.1.11 ansible_user=jarvis
+black-pearl ansible_host=192.168.1.11 ansible_user=jarvis
 
 [jarvis-kube-workers]
-aquaman ansible_host=192.168.1.10 ansible_user=aquaman
-blackpanther ansible_host=192.168.1.13 ansible_user=blackpanther
+dying-gull ansible_host=192.168.1.10 ansible_user=aquaman
+empress ansible_host=192.168.1.13 ansible_user=blackpanther
 
 [jarvis-kube:children]
 jarvis-kube-master
 jarvis-kube-workers
+
+[jarvis-kube:vars]
+loadbalancer_node=dying-gull

@@ -1,4 +1,3 @@
-# This file should be modified after module launch mechanism is created since the flannel should be treated as a kube-system module
 ---
 - name: "Initialize flannel for every host"
   hosts: jarvis-kube-master
