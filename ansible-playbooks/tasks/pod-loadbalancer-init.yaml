@@ -3,6 +3,10 @@
   hosts: jarvis-kube-master
   vars:
     deployment_src_path: "{{ ansible_env.HOME }}/loadbalancer"
+  pre_tasks:
+  - fail:
+      msg: "Loadbalancer node is not defined"
+    when: loadbalancer_node is not defined
   tasks:
   - name: "Ensure directory exists"
     file:
