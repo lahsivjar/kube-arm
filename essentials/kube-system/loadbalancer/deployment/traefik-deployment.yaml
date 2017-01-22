@@ -4,16 +4,16 @@ metadata:
   name: traefik-ingress-controller
   namespace: kube-system
   labels:
-    app: traefik-ingress-controller
+    k8s-app: traefik-ingress-controller
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: traefik-ingress-controller
+      k8s-app: traefik-ingress-controller
   template:
     metadata:
       labels:
-        app: traefik-ingress-controller
+        k8s-app: traefik-ingress-controller
       annotations:
         scheduler.alpha.kubernetes.io/tolerations: |
           [
