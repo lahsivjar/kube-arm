@@ -17,7 +17,7 @@ def _get_service_url(service_dict):
   url_builder.append('.svc.cluster.local:')
   url_builder.append(service_dict['service_port'])
   url_builder.append(service_dict['endpoint'])
-  url_builder.append('?')
+  url_builder.append('?query=')
   url_builder.append(service_dict['query'])
 
   return string.join(url_builder, '')
