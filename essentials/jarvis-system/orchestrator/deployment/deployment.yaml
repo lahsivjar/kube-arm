@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jarvis-orchestrator
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: goog-knowledge-graph
+    spec:
+      containers:
+      - name: jarvis-orchestrator
+        image: lahsivjar/jarvis-orchestrator:latest
+        env:
+        - name: GOOG_KNOWLEDGE_GRAPH_API_KEY
+          value: {{ google_knowledge_graph_api_key }}
+        ports:
+        - containerPort: 8080
