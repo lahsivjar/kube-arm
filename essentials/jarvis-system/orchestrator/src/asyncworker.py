@@ -9,7 +9,7 @@ def do(service_dict):
 
 def _get_service_url(service_dict):
   # TODO: Error handling
-  url_builder = []
+  url_builder = ['http://']
   url_builder.append(service_dict['service_id'])
   url_builder.append('.')
   url_builder.append(service_dict['namespace'])
