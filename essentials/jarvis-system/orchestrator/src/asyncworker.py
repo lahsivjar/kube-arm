@@ -1,11 +1,12 @@
-# Gets a list of services from the service resolver for each query. The module
-# then requests each service with the query in async fashion
+# Gets a list of services from the service resolver for each query. The module then
+# requests each service with the query in async fashion and returns a json response
 import requests
 import string
+import responsefilter
 
 def do(service_dict):
   url = _get_service_url(service_dict)
-  return requests.get(url)
+  return responsefilter.do(service_dict['service_name'], requests.get(url).json())
 
 def _get_service_url(service_dict):
   # TODO: Error handling
