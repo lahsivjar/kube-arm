@@ -15,3 +15,7 @@ spec:
         image: lahsivjar/jarvis-orchestrator:latest
         ports:
         - containerPort: 8080
+      - name: redis
+        image: redis:3.2
+        ports:
+        - containerPort: 6379

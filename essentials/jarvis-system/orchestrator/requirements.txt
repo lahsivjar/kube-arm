@@ -2,3 +2,4 @@ flask
 cherrypy
 enum
 requests
+redis
