@@ -1,5 +1,5 @@
 # Gets a list of services from the service resolver for each query. The module then
-# requests each service with the query in async fashion and returns a json response
+# requests each service with the query and returns a json response with predefined keys
 import requests
 import string
 import responsefilter
