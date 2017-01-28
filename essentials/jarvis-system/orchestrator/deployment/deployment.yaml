@@ -13,6 +13,11 @@ spec:
       containers:
       - name: jarvis-orchestrator
         image: lahsivjar/jarvis-orchestrator:latest
+        env:
+        - name: REDIS_HOST
+          value: 'localhost'
+        - name: REDIS_PORT
+          value: '6379'
         ports:
         - containerPort: 8080
       - name: redis

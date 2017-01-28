@@ -53,6 +53,9 @@ class ServiceRegistry:
   def get_regex_map(self):
     return self._deserialize_data(self.redisinstance.get(_RedisEntryType.REGEX_MAP))
 
+  def clear(self):
+    self.redisinstance.flushdb()
+
   def _serialize_data(self, data):
     return None if data == None else pickle.dumps(data)
 
@@ -75,8 +78,8 @@ class ServiceRegistry:
       
       re_map.update({
           uri: {
-            'regex': re.compile(regex),
-            'service_id': service_id
+            RegistryKeys.ACCEPTANCE_COMPILED_REGEX: re.compile(regex),
+            RegistryKeys.SERVICE_ID: service_id
           }
       })
 
