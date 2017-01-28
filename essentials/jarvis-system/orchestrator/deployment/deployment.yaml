@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: jarvis-orchestrator
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: jarvis-orchestrator
+    spec:
+      containers:
+      - name: jarvis-orchestrator
+        image: lahsivjar/jarvis-orchestrator:latest
+        ports:
+        - containerPort: 8080
+      - name: redis
+        image: hypriot/rpi-redis:latest
+        ports:
+        - containerPort: 6379

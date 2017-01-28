@@ -1,0 +1,13 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: jarvis-orchestrator
+  namespace: jarvis-system
+spec:
+  rules:
+  - http:
+      paths:
+      - path: /jarvis/orchestrator
+        backend:
+          serviceName: jarvis-orchestrator
+          servicePort: 8080
