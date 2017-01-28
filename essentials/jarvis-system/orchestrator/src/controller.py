@@ -10,7 +10,7 @@ mapping = Flask(__name__)
 @mapping.route('/v1', methods=['GET'])
 def query():
   query = request.args.get('query')
-  return Worker().do(query)
+  return json.dumps(Worker().do(query))
 
 @mapping.route('/v1/register', methods=['POST'])
 def register():
