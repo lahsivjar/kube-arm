@@ -36,17 +36,18 @@ class ServiceRegistry:
     # Validate the service that needs to be registered
     try:
       self.validateschema(service_dict)
-      service_key = self._create_service_key(_RedisEntryType.SERVICE_REGISTRY, service_dict[RegistryKeys.SERVICE_ID])
+      service_id = service_dict[RegistryKeys.SERVICE_ID]
+      service_key = self._create_service_key(service_id)
 
       # Update the regex key list
-      self._update_regex_list(service_dict[RegistryKeys.ENDPOINTS]);
+      self._update_regex_list(service_id,service_dict[RegistryKeys.ENDPOINTS]);
       self.redisinstance.set(service_key, self._serialize_data(service_dict))
       return True
     except MultipleInvalid as e:
       return False
 
   def get(self, service_id):
-    service_key = self._create_service_key(_RedisEntryType.SERVICE_REGISTRY, service_id)
+    service_key = self._create_service_key(service_id)
     return self._deserialize_data(self.redisinstance.get(service_key))
 
   def get_regex_map(self):
@@ -58,21 +59,26 @@ class ServiceRegistry:
   def _deserialize_data(self, data):
     return None if data == None else pickle.loads(data)
 
-  def _create_service_key(self, redis_entry_type, rawkey):
-    keybuilder = [redis_entry_type]
+  def _create_service_key(self, rawkey):
+    keybuilder = [_RedisEntryType.SERVICE_REGISTRY]
     keybuilder.append(_KEY_SEPARATOR)
     keybuilder.append(rawkey)
 
     return string.join(keybuilder, '')
 
-  def _update_regex_list(self, endpoints_list):
+  def _update_regex_list(self, service_id, endpoints_list):
     re_map = self.get_regex_map()
     re_map = {} if re_map == None else re_map
     for endpoint in endpoints_list:
       regex = endpoint[RegistryKeys.ACCEPTANCE_REGEX]
       uri = endpoint[RegistryKeys.URI]
       
-      re_map.update({ uri: re.compile(regex) })
+      re_map.update({
+          uri: {
+            'regex': re.compile(regex),
+            'service_id': service_id
+          }
+      })
 
     # Update to the new list in redis
     self.redisinstance.set(_RedisEntryType.REGEX_MAP, self._serialize_data(re_map))

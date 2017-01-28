@@ -17,5 +17,6 @@ def query():
 def register():
   # Get the service description
   service_desc = request.json
+  print ServiceRegistry().get_regex_map()
   # Register service
   return json.dumps(ServiceRegistry().register(service_desc))
