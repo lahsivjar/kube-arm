@@ -14,3 +14,4 @@ class RegistryKeys(Enum):
   ENDPOINTS = 'endpoints'
   URI = 'uri'
   ACCEPTANCE_REGEX = 'acceptance_regex'
+  ACCEPTANCE_COMPILED_REGEX = 'c_regex'
