@@ -16,6 +16,6 @@ spec:
         ports:
         - containerPort: 8080
       - name: redis
-        image: redis:3.2
+        image: hypriot/rpi-redis:latest
         ports:
         - containerPort: 6379
