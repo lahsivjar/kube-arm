@@ -53,8 +53,9 @@ class Worker:
     url_builder.append('.svc.cluster.local:')
     url_builder.append(str(service[RegistryKeys.SERVICE_PORT]))
     url_builder.append(service[RegistryKeys.URI])
-    url_builder.append('?query=')
-    url_builder.append(query)
+    if query:
+      url_builder.append('?query=')
+      url_builder.append(query)
 
     return string.join(url_builder, '')
 
