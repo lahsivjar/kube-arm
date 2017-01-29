@@ -8,6 +8,11 @@ import responsefilter
 from constants import RegistryKeys
 from serviceregistry import ServiceRegistry
 
+# Fix agressive monkey patching of grequests by being overly aggressive
+# WARNING: If curious george continues to cause problems kick him out
+from gevent import monkey as curious_george_messed_up
+curious_george_messed_up.patch_all()
+
 class ServiceResolver:
   def __init__(self):
     self.registry = ServiceRegistry()
@@ -41,9 +46,9 @@ class Worker:
 
   def do(self, query):
     service_list = self.resolver.get_resolved_services(query)
+    response_list = []
     if service_list:
       urls = []
-      response_list = []
       for service in service_list:
         filtered_query = self._filter_query(query, service[RegistryKeys.FILTER_COMPILED_REGEX])
         urls.append(self._get_url(service, filtered_query))
