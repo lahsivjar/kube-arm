@@ -28,7 +28,8 @@ class ServiceResolver:
             RegistryKeys.SERVICE_NAME: service_dict[RegistryKeys.SERVICE_NAME],
             RegistryKeys.NAMESPACE: service_dict[RegistryKeys.NAMESPACE],
             RegistryKeys.SERVICE_PORT: service_dict[RegistryKeys.SERVICE_PORT],
-            RegistryKeys.URI: uri
+            RegistryKeys.URI: uri,
+            RegistryKeys.FILTER_COMPILED_REGEX: value.get(RegistryKeys.FILTER_COMPILED_REGEX)
         })
     return service_list
 
@@ -38,10 +39,10 @@ class Worker:
 
   def do(self, query):
     service_list = self.resolver.get_resolved_services(query)
-    print service_list
     response_list = []
     for service in service_list:
-      response_list.append(requests.get(self._get_url(service, query)).json())
+      filtered_query = self._filter_query(query, service[RegistryKeys.FILTER_COMPILED_REGEX])
+      response_list.append(requests.get(self._get_url(service, filtered_query)).json())
     return response_list
 
   def _get_url(self, service, query):
@@ -55,6 +56,13 @@ class Worker:
     url_builder.append('?query=')
     url_builder.append(query)
 
-    print string.join(url_builder, '')
-
     return string.join(url_builder, '')
+
+  def _filter_query(self, query, filter_regex):
+    if filter_regex == None:
+      return query
+
+    pattern = filter_regex[RegistryKeys.COMPILED_PATTERN]
+    repl = filter_regex[RegistryKeys.REPLACE]
+
+    return pattern.sub(repl, query)

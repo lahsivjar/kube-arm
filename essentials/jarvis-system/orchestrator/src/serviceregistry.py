@@ -28,7 +28,11 @@ class ServiceRegistry:
         Required(RegistryKeys.NAMESPACE, default='default'): Any(str, unicode),
         Required(RegistryKeys.ENDPOINTS): [{
           Required(RegistryKeys.URI): Any(str, unicode),
-          Required(RegistryKeys.ACCEPTANCE_REGEX): Any(str, unicode)
+          Required(RegistryKeys.ACCEPTANCE_REGEX): Any(str, unicode),
+          RegistryKeys.FILTER_REGEX: {
+            Required(RegistryKeys.PATTERN): Any(str, unicode),
+            Required(RegistryKeys.REPLACE): Any(str, unicode)
+          }
         }]
     })
 
@@ -73,15 +77,30 @@ class ServiceRegistry:
     re_map = self.get_regex_map()
     re_map = {} if re_map == None else re_map
     for endpoint in endpoints_list:
-      regex = endpoint[RegistryKeys.ACCEPTANCE_REGEX]
+      a_regex = endpoint[RegistryKeys.ACCEPTANCE_REGEX]
       uri = endpoint[RegistryKeys.URI]
-      
-      re_map.update({
-          uri: {
-            RegistryKeys.ACCEPTANCE_COMPILED_REGEX: re.compile(regex),
-            RegistryKeys.SERVICE_ID: service_id
-          }
-      })
+
+      re_map_entry = {
+        RegistryKeys.ACCEPTANCE_COMPILED_REGEX: re.compile(a_regex),
+        RegistryKeys.SERVICE_ID: service_id
+      }
+
+      # Compile the filter regex
+      if RegistryKeys.FILTER_REGEX in endpoint:
+        f_regex_map = endpoint[RegistryKeys.FILTER_REGEX]
+        f_regex = re.compile(f_regex_map[RegistryKeys.PATTERN], re.I) if f_regex_map != None else None
+        f_repl_regex = f_regex_map[RegistryKeys.REPLACE] if f_regex != None else ''
+
+        if f_regex != None:
+          re_map_entry.update({
+            RegistryKeys.FILTER_COMPILED_REGEX: {
+              RegistryKeys.COMPILED_PATTERN: f_regex,
+              RegistryKeys.REPLACE: f_repl_regex
+            }
+          })
+
+      # Add the new re map entry to the existing re map
+      re_map.update({ uri: re_map_entry })
 
     # Update to the new list in redis
     self.redisinstance.set(_RedisEntryType.REGEX_MAP, self._serialize_data(re_map))
