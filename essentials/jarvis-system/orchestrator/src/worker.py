@@ -2,6 +2,7 @@
 # requests each service with the query and returns a json response with predefined keys
 import requests
 import string
+import grequests
 import responsefilter
 
 from constants import RegistryKeys
@@ -39,10 +40,20 @@ class Worker:
 
   def do(self, query):
     service_list = self.resolver.get_resolved_services(query)
+    urls = []
     response_list = []
     for service in service_list:
       filtered_query = self._filter_query(query, service[RegistryKeys.FILTER_COMPILED_REGEX])
-      response_list.append(requests.get(self._get_url(service, filtered_query)).json())
+      urls.append(self._get_url(service, filtered_query))
+
+    # Create a set of unsent requests
+    response_set = (grequests.get(url) for url in urls)
+    # Send the requests
+    response_array = grequests.map(response_set)
+    # Get the response content from the response and close the response
+    for (response in response_array):
+      response_list.append(response.json())
+      response.close()
     return response_list
 
   def _get_url(self, service, query):
