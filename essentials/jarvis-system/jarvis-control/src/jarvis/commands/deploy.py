@@ -102,20 +102,27 @@ def run(args):
 			except yaml.YAMLError as e:
 				print e	
 
-		print 'Building docker image from source %s with tag %s' % (build_source, tag)
-		subprocess.check_output(('docker build -t %s %s' % (tag, build_source)).split())
-		print 'Docker image created'
-
-		print 'Creating deployment'
-		subprocess.check_output(('kubectl create -f %s' % deployment_file).split())
-		print 'Deployment created'
-
-		print 'Creating service'
-		subprocess.check_output(('kubectl create -f %s' % service_file).split())
-		print 'Service created'
-
-		print 'Creating ingress'
-		subprocess.check_output(('kubectl create -f %s' % ingress_file).split())
-		print 'Ingress created'
+		deploy()
 	except subprocess.CalledProcessError as e:
 		print 'ERROR: ' , e.output
+
+def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path):
+	print 'Building docker image from source %s with tag %s' % (build_source, tag)
+	subprocess.check_output(('docker build -t %s %s' % (tag, build_source)).split())
+	print 'Docker image created'
+
+	#TODO verify yamls
+	if deployment_file_path is not None:
+		print 'Creating deployment'
+		subprocess.check_output(('kubectl create -f %s' % deployment_file_path).split())
+		print 'Deployment created'
+
+	if service_file_path is not None:
+		print 'Creating service'
+		subprocess.check_output(('kubectl create -f %s' % service_file_path).split())
+		print 'Service created'
+
+	if ingress_file_path is not None:
+		print 'Creating ingress'
+		subprocess.check_output(('kubectl create -f %s' % ingress_file_path).split())
+		print 'Ingress created'
