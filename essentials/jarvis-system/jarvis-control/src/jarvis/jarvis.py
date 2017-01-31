@@ -9,6 +9,7 @@ from commands import *
 DEBUG = False
 
 def command_list():
+	#TODO get command list automatically
 	return [('deploy', 'Deploy a jarvis kube module'),
 			('version', 'Display jarvis version')]
 
@@ -28,10 +29,7 @@ def handle_command(args):
 		command.run(args)
 	else:
 		print '%s: command not found' % args[0]
-	return 0;
-	
-def handle_orchestrator_task(args):
-	print args
+	return 0		
 	
 def get_command_module(command_name):
 	# look for command module in commands directory
@@ -57,7 +55,8 @@ def print_command_list():
 	commands = command_list()
 	print 'Jarvis control commands:'
 	print '------------------------'
-	print "\n".join(['  %-18s %-80s' % (command[0], command[1]) for command in commands])
+	print "\n".join(['  %-18s %-80s' % (command[0], command[1]) \
+		for command in commands])
 	
 def create_jarvis_parser():
 	parser = argparse.ArgumentParser('jarvis', add_help=False)
@@ -73,12 +72,14 @@ def create_jarvis_parser():
 		action='store_true')
 	parser.add_argument(
 		'-o', '--orchestrate',
-		dest='handler',
+		dest='arguments',
 		help='Provide task for the orchestrator (Default: Provide jarvis \
 		control command)',
 		required=False,
-		default=handle_command,
-		const=handle_orchestrator_task,
+		default=sys.argv[1:],
+		#remove -o or --orchestrate option and send as orchestrate command
+		const=['orchestrate'] + list([arg for arg in sys.argv[1:] \
+			if arg != '-o' and arg != '--orchestrate']),
 		action='store_const')
 	return parser
 
@@ -89,7 +90,7 @@ def main():
 		print_help(parser)
 	elif not args.help and len(args.command) == 0: 
 		print 'What can I do for you?'
-	else: args.handler(sys.argv[1:])
+	else: handle_command(args.arguments)
 	return 0
 		
 if __name__ == '__main__':
