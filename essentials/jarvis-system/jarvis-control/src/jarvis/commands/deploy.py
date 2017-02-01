@@ -1,12 +1,21 @@
 #!/usr/bin/python
 
-import subprocess
-import argparse
-import urllib
+import os
+import json
 import uuid
 import yaml
-import os
+import urllib
+import urllib2
+import argparse
+import subprocess
 from urlparse import urlparse
+
+# TODO get config from central location
+ORCHESTRATOR_PROTOCOL = 'http'
+ORCHESTRATOR_HOST = '119.74.248.86'
+# ORCHESTRATOR_HOST = '192.168.1.11'
+ORCHESTRATOR_PORT = '8080'
+ORCHESTRATOR_REGISTER_PATH = 'jarvis/orchestrator/v1/register'
 
 GITHUB_DEFAULT_REPO = 'https://github.com/lahsivjar/jarvis-kube-modules.git'
 GITHUB_RAW_CONTENT_URL = 'https://raw.githubusercontent.com'
@@ -15,6 +24,7 @@ GITHUB_DEFAULT_BRANCH = 'master'
 DEFAULT_DEPLOYMENT_PATH = 'deployment/deployment.yaml'
 DEFAULT_SERVICE_PATH = 'deployment/service.yaml'
 DEFAULT_INGRESS_PATH = 'deployment/ingress.yaml'
+DEFAULT_REGISTRY_PATH = 'deployment/registry.yaml'
 
 DEFAULT_TEMP_DIR = '/tmp'
 
@@ -56,6 +66,14 @@ def get_repo_data(repo_url):
 	username = url.path.split('/')[1]
 	repo_name = url.path.split('/')[2][:-4]
 	return (username, repo_name)
+	
+def convert_yaml_to_object(yaml_path):
+	with open(yaml_path, 'r') as stream:
+			try:
+				return yaml.load(stream)
+			except yaml.YAMLError as e:
+				print e
+				raise
 
 def run(args):
 	if args.repo_url is None and args.module_path is None:
@@ -74,6 +92,7 @@ def run(args):
 	deployment_path = get_raw_content_url(DEFAULT_DEPLOYMENT_PATH, username, repo_name, branch_name, module_path)
 	service_path = get_raw_content_url(DEFAULT_SERVICE_PATH, username, repo_name, branch_name, module_path)
 	ingress_path = get_raw_content_url(DEFAULT_INGRESS_PATH, username, repo_name, branch_name, module_path)
+	registry_path = get_raw_content_url(DEFAULT_REGISTRY_PATH, username, repo_name, branch_name, module_path)
 
 	tmp_dir = uuid.uuid4().hex
 	
@@ -88,25 +107,26 @@ def run(args):
 		make_dirs(service_file)
 		urllib.urlretrieve(service_path, service_file)
 		#TODO handle if service file does not exist or network fails
+		
+		registry_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'registry.yaml'
+	    make_dirs(registry_file)
+		urllib.urlretrieve(registry_path, registry_file)
+		#TODO handle if ingress file does not exist or network fails
 
 		ingress_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'ingress.yaml'
-	        make_dirs(ingress_file)
-        	urllib.urlretrieve(ingress_path, ingress_file)
-	        #TODO handle if ingress file does not exist or network fails
+	    make_dirs(ingress_file)
+		urllib.urlretrieve(ingress_path, ingress_file)
+		#TODO handle if ingress file does not exist or network fails
 		print 'Deployment files downloaded'
 
-		with open(deployment_file, 'r') as stream:
-			try:
-				deployment_info = yaml.load(stream)
-				tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
-			except yaml.YAMLError as e:
-				print e	
+		deployment_info = convert_yaml_to_object(deployment_file)
+		tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
 
-		deploy()
+		deploy(build_source, tag, deployment_file, service_file, ingress_file, registry_file)
 	except subprocess.CalledProcessError as e:
 		print 'ERROR: ' , e.output
 
-def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path):
+def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path, registry_file_path):
 	print 'Building docker image from source %s with tag %s' % (build_source, tag)
 	subprocess.check_output(('docker build -t %s %s' % (tag, build_source)).split())
 	print 'Docker image created'
@@ -126,3 +146,15 @@ def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_f
 		print 'Creating ingress'
 		subprocess.check_output(('kubectl create -f %s' % ingress_file_path).split())
 		print 'Ingress created'
+		
+	if registry_file_path is not None:
+		print 'Registering module'
+		registry_info = convert_yaml_to_object(registry_file_path)
+		request_url = '%s://%s:%s/%s' % (ORCHESTRATOR_PROTOCOL, ORCHESTRATOR_HOST, ORCHESTRATOR_PORT, ORCHESTRATOR_REGISTER_PATH)
+		response = urllib2.urlopen(request_url, data=json.dumps(request_url))
+		response_data = json.load(response)
+		print response_data
+		if response_data is not None:
+			print 'Module registered'
+		else:
+			print 'Module registration failed'
