@@ -109,12 +109,12 @@ def run(args):
 		#TODO handle if service file does not exist or network fails
 		
 		registry_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'registry.yaml'
-	    make_dirs(registry_file)
+		make_dirs(registry_file)
 		urllib.urlretrieve(registry_path, registry_file)
 		#TODO handle if ingress file does not exist or network fails
 
 		ingress_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'ingress.yaml'
-	    make_dirs(ingress_file)
+		make_dirs(ingress_file)
 		urllib.urlretrieve(ingress_path, ingress_file)
 		#TODO handle if ingress file does not exist or network fails
 		print 'Deployment files downloaded'
