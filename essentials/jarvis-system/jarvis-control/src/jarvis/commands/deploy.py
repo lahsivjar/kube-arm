@@ -151,10 +151,10 @@ def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_f
 		print 'Registering module'
 		registry_info = convert_yaml_to_object(registry_file_path)
 		request_url = '%s://%s:%s/%s' % (ORCHESTRATOR_PROTOCOL, ORCHESTRATOR_HOST, ORCHESTRATOR_PORT, ORCHESTRATOR_REGISTER_PATH)
-		response = urllib2.urlopen(request_url, data=json.dumps(request_url))
+		req = urllib2.Request(request_url, json.dumps(registry_info), {'Content-Type': 'application/json'})
+		response = urllib2.urlopen(req)
 		response_data = json.load(response)
-		print response_data
-		if response_data is not None:
+		if response_data:
 			print 'Module registered'
 		else:
 			print 'Module registration failed'
