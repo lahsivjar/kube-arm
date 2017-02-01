@@ -52,6 +52,15 @@ def available_arguments():
 
 def get_raw_content_url(target, username, repo_name, branch_name, path):
 	return GITHUB_RAW_CONTENT_URL + '/' + username + '/' + repo_name + '/' + branch_name + '/' + path + '/' + target
+	
+def retrieve_file(url, file):
+	try:
+		urllib.urlretrieve(url, file)
+		print file
+		return file, True
+	except URLError as e:
+		return None, False
+		
 
 def make_dirs(filename):
 	if not os.path.exists(os.path.dirname(filename)):
@@ -98,24 +107,24 @@ def run(args):
 	
 	try:
 		print 'Downloading deployment files'
-		deployment_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + '/deployment.yaml'
+		deployment_file = '%s/%s/deployment.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(deployment_file)
-		urllib.urlretrieve(deployment_path, deployment_file)
+		deployment_file = retrieve_file(deployment_path, deployment_file)
 		#TODO handle the case where deployment file does not exist or network fails
 	
-		service_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'service.yaml'
+		service_file = '%s/%s/service.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(service_file)
-		urllib.urlretrieve(service_path, service_file)
+		service_file = retrieve_file(service_path, service_file)
 		#TODO handle if service file does not exist or network fails
 		
-		registry_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'registry.yaml'
+		registry_file = '%s/%s/registry.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(registry_file)
-		urllib.urlretrieve(registry_path, registry_file)
+		registry_file = retrieve_file(registry_path, registry_file)
 		#TODO handle if ingress file does not exist or network fails
 
-		ingress_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'ingress.yaml'
+		ingress_file = '%s/%s/ingress.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(ingress_file)
-		urllib.urlretrieve(ingress_path, ingress_file)
+		ingress_file = retrieve_file(ingress_path, ingress_file)
 		#TODO handle if ingress file does not exist or network fails
 		print 'Deployment files downloaded'
 
