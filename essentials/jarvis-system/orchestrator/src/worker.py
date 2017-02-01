@@ -59,8 +59,11 @@ class Worker:
       response_array = grequests.map(response_set)
       # Get the response content from the response and close the response
       for response in response_array:
-        response_list.append(response.json())
-        response.close()
+        if response:
+          response_list.append(response.json())
+          response.close()
+        # TODO: Else response should contain the fact that it failed to get anything from the service
+        # Probably handle it via responsefilter
     return response_list
 
   def _get_url(self, service, query):
