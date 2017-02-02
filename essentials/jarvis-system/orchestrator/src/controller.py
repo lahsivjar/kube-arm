@@ -18,3 +18,10 @@ def register():
   service_desc = request.json
   # Register service
   return json.dumps(ServiceRegistry().register(service_desc))
+
+@mapping.route('/v1/deregister', methods=['POST'])
+def deregister():
+  # Get service id to deregister
+  service_id = request.form['service_id']
+  # Deregister the service
+  return json.dumps(ServiceRegistry().deregister(service_id))

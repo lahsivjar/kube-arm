@@ -50,7 +50,6 @@ class ServiceRegistry:
             RegistryKeys.COMPILED_PATTERN: re.compile(f_regex.pop(RegistryKeys.PATTERN), re.I),
             RegistryKeys.REPLACE: f_regex.pop(RegistryKeys.REPLACE, None)
           }
-
         # Update the endpoint object
         endpoint[RegistryKeys.ACCEPTANCE_COMPILED_REGEX] = compiled_a_regex
         endpoint[RegistryKeys.FILTER_COMPILED_REGEX] = compiled_f_regex
@@ -59,6 +58,12 @@ class ServiceRegistry:
       return True
     except MultipleInvalid as e:
       return False
+
+  def deregister(self, service_id):
+    if service_id:
+      self.redisinstance.hdel(_SERVICE_REGISTRY, service_id)
+      return not self.redisinstance.hexists(_SERVICE_REGISTRY, service_id)
+    return False
 
   def get(self, service_id):
     return self._deserialize_data(self.redisinstance.hget(_SERVICE_REGISTRY, service_id))
