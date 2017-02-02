@@ -18,25 +18,27 @@ class ServiceResolver:
     self.registry = ServiceRegistry()
 
   def get_resolved_services(self, query):
-    regex_map = self.registry.get_regex_map()
+    all_services = self.registry.getall()
     service_list = []
-    if regex_map != None:
-      for uri, value in regex_map.iteritems():
-        service_id = value.get(RegistryKeys.SERVICE_ID)
-        regex = value.get(RegistryKeys.ACCEPTANCE_COMPILED_REGEX)
+    for service in all_services:
+      assert service != None
+      service_id = service[RegistryKeys.SERVICE_ID]
+      service_name = service[RegistryKeys.SERVICE_NAME]
+      service_port = service[RegistryKeys.SERVICE_PORT]
+      namespace = service[RegistryKeys.NAMESPACE]
+      for endpoint in service[RegistryKeys.ENDPOINTS]:
+        a_regex = endpoint.get(RegistryKeys.ACCEPTANCE_COMPILED_REGEX)
 
         # Evaluate regex if matches then add the service to the list
-        match = regex.match(query)
+        match = a_regex.match(query)
         if match != None:
-          service_dict = self.registry.get(service_id)
-          assert service_dict != None
           service_list.append({
-              RegistryKeys.SERVICE_ID: service_dict[RegistryKeys.SERVICE_ID],
-              RegistryKeys.SERVICE_NAME: service_dict[RegistryKeys.SERVICE_NAME],
-              RegistryKeys.NAMESPACE: service_dict[RegistryKeys.NAMESPACE],
-              RegistryKeys.SERVICE_PORT: service_dict[RegistryKeys.SERVICE_PORT],
-              RegistryKeys.URI: uri,
-              RegistryKeys.FILTER_COMPILED_REGEX: value.get(RegistryKeys.FILTER_COMPILED_REGEX)
+              RegistryKeys.SERVICE_ID: service_id,
+              RegistryKeys.SERVICE_NAME: service_name,
+              RegistryKeys.SERVICE_PORT: service_port,
+              RegistryKeys.NAMESPACE: namespace,
+              RegistryKeys.URI: endpoint[RegistryKeys.URI],
+              RegistryKeys.FILTER_COMPILED_REGEX: endpoint[RegistryKeys.FILTER_COMPILED_REGEX]
           })
     return service_list
 
