@@ -85,12 +85,12 @@ def create_jarvis_parser():
 
 def main():
 	parser = create_jarvis_parser()
-	args = parser.parse_args(sys.argv[1:])
+	args, rem_args = parser.parse_known_args(sys.argv[1:])
 	if args.help and len(args.command) == 0:
 		print_help(parser)
 	elif not args.help and len(args.command) == 0: 
 		print 'What can I do for you?'
-	else: handle_command(args.arguments)
+	else: handle_command(args.arguments + rem_args)
 	return 0
 		
 if __name__ == '__main__':

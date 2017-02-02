@@ -26,6 +26,8 @@ DEFAULT_SERVICE_PATH = 'deployment/service.yaml'
 DEFAULT_INGRESS_PATH = 'deployment/ingress.yaml'
 DEFAULT_REGISTRY_PATH = 'deployment/registry.yaml'
 
+MSG_DEPLOYMENT_FILE_NOT_FOUND = 'Deployment file: %s not found'
+
 DEFAULT_TEMP_DIR = '/tmp'
 
 def available_arguments():
@@ -53,13 +55,14 @@ def available_arguments():
 def get_raw_content_url(target, username, repo_name, branch_name, path):
 	return GITHUB_RAW_CONTENT_URL + '/' + username + '/' + repo_name + '/' + branch_name + '/' + path + '/' + target
 	
-def retrieve_file(url, file):
+def retrieve_file(url, file_path):
 	try:
-		urllib.urlretrieve(url, file)
-		print file
-		return file, True
-	except URLError as e:
-		return None, False
+		response = urllib2.urlopen(url)
+		with open(file_path, 'w') as file:
+			file.write(response.read())
+		return True
+	except urllib2.HTTPError as e:
+		return False
 		
 
 def make_dirs(filename):
@@ -78,11 +81,11 @@ def get_repo_data(repo_url):
 	
 def convert_yaml_to_object(yaml_path):
 	with open(yaml_path, 'r') as stream:
-			try:
-				return yaml.load(stream)
-			except yaml.YAMLError as e:
-				print e
-				raise
+		try:
+			return yaml.load(stream)
+		except yaml.YAMLError as e:
+			print e
+			raise
 
 def run(args):
 	if args.repo_url is None and args.module_path is None:
@@ -98,40 +101,45 @@ def run(args):
 
 	username, repo_name = get_repo_data(repo_url)
 	
-	deployment_path = get_raw_content_url(DEFAULT_DEPLOYMENT_PATH, username, repo_name, branch_name, module_path)
-	service_path = get_raw_content_url(DEFAULT_SERVICE_PATH, username, repo_name, branch_name, module_path)
-	ingress_path = get_raw_content_url(DEFAULT_INGRESS_PATH, username, repo_name, branch_name, module_path)
-	registry_path = get_raw_content_url(DEFAULT_REGISTRY_PATH, username, repo_name, branch_name, module_path)
+	deployment_url = get_raw_content_url(DEFAULT_DEPLOYMENT_PATH, username, repo_name, branch_name, module_path)
+	service_url = get_raw_content_url(DEFAULT_SERVICE_PATH, username, repo_name, branch_name, module_path)
+	ingress_url = get_raw_content_url(DEFAULT_INGRESS_PATH, username, repo_name, branch_name, module_path)
+	registry_url = get_raw_content_url(DEFAULT_REGISTRY_PATH, username, repo_name, branch_name, module_path)
 
 	tmp_dir = uuid.uuid4().hex
 	
 	try:
 		print 'Downloading deployment files'
-		deployment_file = '%s/%s/deployment.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
-		make_dirs(deployment_file)
-		deployment_file = retrieve_file(deployment_path, deployment_file)
-		#TODO handle the case where deployment file does not exist or network fails
-	
-		service_file = '%s/%s/service.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
-		make_dirs(service_file)
-		service_file = retrieve_file(service_path, service_file)
-		#TODO handle if service file does not exist or network fails
+		deployment_file_path = '%s/%s/deployment.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		make_dirs(deployment_file_path)
+		if not retrieve_file(deployment_url, deployment_file_path):
+			print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_DEPLOYMENT_PATH
+			return 1
+			
+		service_file_path = '%s/%s/service.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		make_dirs(service_file_path)
+		if not retrieve_file(service_url, service_file_path):
+			print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_SERVICE_PATH
+			return 1
 		
-		registry_file = '%s/%s/registry.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
-		make_dirs(registry_file)
-		registry_file = retrieve_file(registry_path, registry_file)
-		#TODO handle if ingress file does not exist or network fails
-
-		ingress_file = '%s/%s/ingress.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
-		make_dirs(ingress_file)
-		ingress_file = retrieve_file(ingress_path, ingress_file)
-		#TODO handle if ingress file does not exist or network fails
+		ingress_file_path = '%s/%s/ingress.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		make_dirs(ingress_file_path)
+		# if not retrieve_file(ingress_url, ingress_file_path):
+			# print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_INGRESS_PATH
+			# print 'Module will not be externally reachable'
+		
+		registry_file_path = '%s/%s/registry.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		make_dirs(registry_file_path)
+		# if not retrieve_file(registry_url, registry_file_path):
+			# print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_REGISTRY_PATH
+			# print 'Module will not be registered on the orchestrator'
+		
 		print 'Deployment files downloaded'
 
-		deployment_info = convert_yaml_to_object(deployment_file)
+		deployment_info = convert_yaml_to_object(deployment_file_path)
 		tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
 
-		deploy(build_source, tag, deployment_file, service_file, ingress_file, registry_file)
+		deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path, registry_file_path)
 	except subprocess.CalledProcessError as e:
 		print 'ERROR: ' , e.output
 
