@@ -113,24 +113,28 @@ def run(args):
 		deployment_file_path = '%s/%s/deployment.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(deployment_file_path)
 		if not retrieve_file(deployment_url, deployment_file_path):
+			deployment_file_path = None
 			print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_DEPLOYMENT_PATH
 			return 1
 			
 		service_file_path = '%s/%s/service.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(service_file_path)
 		if not retrieve_file(service_url, service_file_path):
+			service_file_path = None
 			print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_SERVICE_PATH
 			return 1
 		
 		ingress_file_path = '%s/%s/ingress.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(ingress_file_path)
-		# if not retrieve_file(ingress_url, ingress_file_path):
+		if not retrieve_file(ingress_url, ingress_file_path):
+			ingress_file_path = None
 			# print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_INGRESS_PATH
 			# print 'Module will not be externally reachable'
 		
 		registry_file_path = '%s/%s/registry.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
 		make_dirs(registry_file_path)
-		# if not retrieve_file(registry_url, registry_file_path):
+		if not retrieve_file(registry_url, registry_file_path):
+			registry_file_path = None
 			# print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_REGISTRY_PATH
 			# print 'Module will not be registered on the orchestrator'
 		
@@ -140,6 +144,8 @@ def run(args):
 		tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
 
 		deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path, registry_file_path)
+		
+		cleanup(tmp_dir)
 	except subprocess.CalledProcessError as e:
 		print 'ERROR: ' , e.output
 
@@ -175,3 +181,6 @@ def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_f
 			print 'Module registered'
 		else:
 			print 'Module registration failed'
+			
+def cleanup(tmp_dir):
+	os.removedirs(tmp_dir)
