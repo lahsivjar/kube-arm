@@ -4,6 +4,7 @@ import os
 import json
 import uuid
 import yaml
+import shutil
 import urllib
 import urllib2
 import argparse
@@ -106,32 +107,32 @@ def run(args):
 	ingress_url = get_raw_content_url(DEFAULT_INGRESS_PATH, username, repo_name, branch_name, module_path)
 	registry_url = get_raw_content_url(DEFAULT_REGISTRY_PATH, username, repo_name, branch_name, module_path)
 
-	tmp_dir = uuid.uuid4().hex
+	tmp_dir = ''.join([DEFAULT_TEMP_DIR, '/',  uuid.uuid4().hex])
 	
 	try:
 		print 'Downloading deployment files'
-		deployment_file_path = '%s/%s/deployment.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		deployment_file_path = ''.join([tmp_dir, '/deployment.yaml'])
 		make_dirs(deployment_file_path)
 		if not retrieve_file(deployment_url, deployment_file_path):
 			deployment_file_path = None
 			print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_DEPLOYMENT_PATH
 			return 1
 			
-		service_file_path = '%s/%s/service.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		service_file_path = ''.join([tmp_dir, '/service.yaml'])
 		make_dirs(service_file_path)
 		if not retrieve_file(service_url, service_file_path):
 			service_file_path = None
 			print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_SERVICE_PATH
 			return 1
 		
-		ingress_file_path = '%s/%s/ingress.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		ingress_file_path = ''.join([tmp_dir, '/ingress.yaml'])
 		make_dirs(ingress_file_path)
 		if not retrieve_file(ingress_url, ingress_file_path):
 			ingress_file_path = None
 			# print MSG_DEPLOYMENT_FILE_NOT_FOUND % DEFAULT_INGRESS_PATH
 			# print 'Module will not be externally reachable'
 		
-		registry_file_path = '%s/%s/registry.yaml' % (DEFAULT_TEMP_DIR, tmp_dir)
+		registry_file_path = ''.join([tmp_dir, '/registry.yaml'])
 		make_dirs(registry_file_path)
 		if not retrieve_file(registry_url, registry_file_path):
 			registry_file_path = None
@@ -144,10 +145,11 @@ def run(args):
 		tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
 
 		deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path, registry_file_path)
-		
-		cleanup(tmp_dir)
+
 	except subprocess.CalledProcessError as e:
-		print 'ERROR: ' , e.output
+		print 'ERROR: ' , e
+	finally:
+		cleanup(tmp_dir)
 
 def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path, registry_file_path):
 	print 'Building docker image from source %s with tag %s' % (build_source, tag)
@@ -183,4 +185,4 @@ def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_f
 			print 'Module registration failed'
 			
 def cleanup(tmp_dir):
-	os.removedirs(tmp_dir)
+	shutil.rmtree(tmp_dir)
