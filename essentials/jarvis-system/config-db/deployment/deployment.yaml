@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: config-db
+  namespace: jarvis-system
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        run: config-db
+    spec:
+      containers:
+      - name: redis
+        image: hypriot/rpi-redis:latest
+        ports:
+        - containerPort: 6379

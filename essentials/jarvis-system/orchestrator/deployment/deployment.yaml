@@ -15,12 +15,8 @@ spec:
         image: lahsivjar/jarvis-orchestrator:latest
         env:
         - name: REDIS_HOST
-          value: 'localhost'
+          value: 'config-db.jarvis-system.svc.cluster.local'
         - name: REDIS_PORT
           value: '6379'
         ports:
         - containerPort: 8080
-      - name: redis
-        image: hypriot/rpi-redis:latest
-        ports:
-        - containerPort: 6379
