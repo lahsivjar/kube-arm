@@ -18,7 +18,7 @@ class ServiceResolver:
     self.registry = ServiceRegistry()
 
   def get_resolved_services(self, query):
-    all_services = self.registry.getall()
+    all_services = self.registry.get_detailed_service_list()
     service_list = []
     for service in all_services:
       assert service != None

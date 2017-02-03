@@ -65,10 +65,13 @@ class ServiceRegistry:
       return not self.redisinstance.hexists(_SERVICE_REGISTRY, service_id)
     return False
 
-  def get(self, service_id):
+  def get_service(self, service_id):
     return self._deserialize_data(self.redisinstance.hget(_SERVICE_REGISTRY, service_id))
 
-  def getall(self):
+  def get_service_list(self):
+    return self.redisinstance.hkeys(_SERVICE_REGISTRY)
+
+  def get_detailed_service_list(self):
     all_services_map = self.redisinstance.hgetall(_SERVICE_REGISTRY)
     all_services_list = all_services_map.values() if all_services_map else []
     deserialized_all_services_list = []
