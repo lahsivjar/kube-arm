@@ -1,12 +1,15 @@
 #!/usr/bin/python
 
-import re
 import sys
+import uuid
+import shutil
 import argparse
 import importlib
 from commands import *
 
-DEBUG = False
+import config
+
+DEBUG = True
 
 def command_list():
 	#TODO get command list automatically
@@ -26,10 +29,20 @@ def handle_command(args):
 				else:
 					parser.add_argument(**argument)
 		args = parser.parse_args(args[1:])
-		command.run(args)
+		tmp_dir = ''.join([config.get_config('tmp_working_dir'), '/',  uuid.uuid4().hex])
+		try:
+			command.run(args, tmp_dir)
+		finally:
+			cleanup(tmp_dir)
 	else:
 		print '%s: command not found' % args[0]
-	return 0		
+	return 0
+
+def cleanup(work_dir):
+	try:
+		shutil.rmtree(work_dir)
+	except:
+		pass
 	
 def get_command_module(command_name):
 	# look for command module in commands directory
