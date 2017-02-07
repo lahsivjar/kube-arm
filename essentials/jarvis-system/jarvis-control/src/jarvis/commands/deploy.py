@@ -3,6 +3,7 @@
 import json
 import urllib2
 import argparse
+import register
 import subprocess
 
 from .. import util
@@ -30,7 +31,11 @@ def available_arguments():
 		},
 		{
 			'flags': ('-r', '--register'),
-			'help': 'Register the module after deploy'
+			'help': 'Register the module after deploy',
+			'default': config.get_config('deploy.default.should_register'),
+			'const': True,
+			'action': 'store_const',
+			'required': False
 		}
 	]
 
@@ -42,7 +47,7 @@ def run(args, work_dir):
 	repo_url = args.repo_url if args.repo_url is not None else config.get_config('deploy.default.repo')
 	branch_name = args.branch if args.branch is not None else config.get_config('deploy.default.branch')
 	module_path = args.module_path if args.module_path is not None else config.get_config('deploy.default.module_path')
-	should_register = args.register if args.register is not None else config.get_config('deploy.default.should_register')
+	should_register = args.register
 
 	build_source = ''.join([repo_url, '#', branch_name])
 	build_source = ''.join([build_source, (':' + module_path if module_path is not '' else '')])
@@ -56,7 +61,7 @@ def run(args, work_dir):
 	ingress_file_path = ''.join([work_dir, '/ingress.yaml'])
 	
 	if should_register:
-		registry_url = util.get_github_raw_content_url(config.get_config('deploy.default.registry_yaml_path'), repo_url, branch_name, module_path)
+		registry_url = util.get_github_raw_content_url(config.get_config('register.default.registry_yaml_path'), repo_url, branch_name, module_path)
 		registry_file_path = ''.join([work_dir, '/registry.yaml'])
 	
 	try:
