@@ -34,8 +34,8 @@ class ServiceRegistry:
     })
 
   def register(self, service_dict):
-    # Validate the service that needs to be registered
     try:
+      # Validate the service that needs to be registered
       self.validateschema(service_dict)
       service_id = service_dict[RegistryKeys.SERVICE_ID]
 
@@ -45,13 +45,16 @@ class ServiceRegistry:
         a_regex = endpoint.pop(RegistryKeys.ACCEPTANCE_REGEX)
         f_regex = endpoint.pop(RegistryKeys.FILTER_REGEX, None)
         compiled_a_regex = re.compile(a_regex)
-        endpoint[RegistryKeys.ACCEPTANCE_COMPILED_REGEX] = compiled_a_regex
+        compiled_f_regex = None
         if f_regex:
           compiled_f_regex = {
             RegistryKeys.COMPILED_PATTERN: re.compile(f_regex.pop(RegistryKeys.PATTERN), re.I),
             RegistryKeys.REPLACE: f_regex.pop(RegistryKeys.REPLACE, None)
           }
-          endpoint[RegistryKeys.FILTER_COMPILED_REGEX] = compiled_f_regex
+
+        # Update the endpoint object
+        endpoint[RegistryKeys.FILTER_COMPILED_REGEX] = compiled_f_regex
+        endpoint[RegistryKeys.ACCEPTANCE_COMPILED_REGEX] = compiled_a_regex
       self.redisinstance.hset(_SERVICE_REGISTRY, service_id, self._serialize_data(service_dict))
       return True
     except MultipleInvalid as e:
