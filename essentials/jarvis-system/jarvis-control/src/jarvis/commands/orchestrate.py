@@ -15,7 +15,7 @@ def available_arguments():
 		}
 	]
 
-def run(args):
+def run(args, work_dir):
 	task = ' '.join(args.task)
 	request_url = '%s://%s:%s/%s' % (
 		config.get_config('orchestrator.protocol'),

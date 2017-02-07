@@ -15,6 +15,7 @@ def get_github_raw_content_url(target, repo_url, branch_name, path):
 def retrieve_file(url, file_path):
 	try:
 		response = urllib2.urlopen(url)
+		make_dirs(file_path)
 		with open(file_path, 'w') as file:
 			file.write(response.read())
 		return True
@@ -24,7 +25,6 @@ def retrieve_file(url, file_path):
 def retrieve_files(*file_infos):
 	success = {}
 	for file_info in file_infos:
-		make_dirs(file_info[1])
 		if not retrieve_file(file_info[0], file_info[1]):
 			success[file_info[1]] = False
 			if file_info[2]:

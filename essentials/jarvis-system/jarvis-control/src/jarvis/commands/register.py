@@ -1,5 +1,8 @@
 #!/usr/bin/python
 
+import json
+import urllib2
+
 from .. import util
 from .. import config
 
@@ -24,8 +27,9 @@ def run(args, work_dir):
 
 def register(registry_file_path):
 	if registry_file_path is not None:
-		print 'Registering module'
 		registry_info = util.convert_yaml_to_object(registry_file_path)
+		print 'Registering module %s' % registry_info['service_name']
+
 		request_url = '%s://%s:%s/%s' % (
 			config.get_config('orchestrator.protocol'),
 			config.get_config('orchestrator.host'),
@@ -33,9 +37,15 @@ def register(registry_file_path):
 			config.get_config('orchestrator.register_path')
 		)
 		req = urllib2.Request(request_url, json.dumps(registry_info), {'Content-Type': 'application/json'})
-		response = urllib2.urlopen(req)
-		response_data = json.load(response)
-		if response_data:
-			print 'Module registered'
-		else:
-			print 'Module registration failed'
+		try:
+			response = urllib2.urlopen(req)
+			response_data = json.load(response)
+			if response_data:
+				print 'Module registered'
+			else:
+				print 'Module registration failed'
+		except urllib2.HTTPError as e:
+			if e.code == 404:
+				print 'Orchestrator not found'
+			else:
+				raise e
