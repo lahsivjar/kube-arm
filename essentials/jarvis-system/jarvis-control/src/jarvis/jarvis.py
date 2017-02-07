@@ -1,31 +1,25 @@
 #!/usr/bin/python
 
 import sys
-import importlib
+import uuid
+import shutil
 import argparse
+import importlib
 from commands import *
 
+import config
+
+DEBUG = True
+
+def command_list():
+	#TODO get command list automatically
+	return [('deploy', 'Deploy a jarvis kube module'),
+			('version', 'Display jarvis version')]
+
 def handle_command(args):
-	command = None
-	# look for command module in commands directory
-	try:
-		# causes exception in development due to module path issues
-		command = importlib.import_module('jarvis.commands.' + args[0])
-	except ImportError as e:
-		print e
-		try:
-			# does not work in distributable
-			command = importlib.import_module('.' + args[0], 'commands')
-		except ImportError as e:
-			print e
-			# the module for the command does not exist
-			print '\'' + args[0] + '\' command not found' 
-	
+	command = get_command_module(args[0])
 	if command is not None:
-		command_module_name = command.__name__
-		command_module_name_arr = command_module_name.split('.')
-		command_name = command_module_name_arr[len(command_module_name_arr) - 1]
-		parser = argparse.ArgumentParser('jarvis %s' % command_name)
+		parser = argparse.ArgumentParser('jarvis %s' % args[0])
 		if hasattr(command, 'available_arguments'):
 			for argument in command.available_arguments():
 				if argument.has_key('flags'):
@@ -35,11 +29,82 @@ def handle_command(args):
 				else:
 					parser.add_argument(**argument)
 		args = parser.parse_args(args[1:])
-		command.run(args)
-	return 0;
+		tmp_dir = ''.join([config.get_config('tmp_working_dir'), '/',  uuid.uuid4().hex])
+		try:
+			command.run(args, tmp_dir)
+		finally:
+			cleanup(tmp_dir)
+	else:
+		print '%s: command not found' % args[0]
+	return 0
+
+def cleanup(work_dir):
+	try:
+		shutil.rmtree(work_dir)
+	except:
+		pass
 	
+def get_command_module(command_name):
+	# look for command module in commands directory
+	try:
+		# causes exception in development due to module path issues
+		return importlib.import_module('jarvis.commands.%s' % command_name)
+	except ImportError as e:
+		if DEBUG: print e
+		try:
+			# does not work in distributable
+			return importlib.import_module('.%s' % command_name, 'commands')
+		except ImportError as e:
+			if DEBUG: print e
+			# the module for the command does not exist
+			return None
+			
+def print_help(parser):
+	parser.print_help()
+	print
+	print_command_list()
+			
+def print_command_list():
+	commands = command_list()
+	print 'Jarvis control commands:'
+	print '------------------------'
+	print "\n".join(['  %-18s %-80s' % (command[0], command[1]) \
+		for command in commands])
+	
+def create_jarvis_parser():
+	parser = argparse.ArgumentParser('jarvis', add_help=False)
+	parser.add_argument(
+		'command', 
+		help='Jarvis control command or task for the orchestrator with \
+		orchestrate option(-o) enabled',
+		nargs = '*')
+	parser.add_argument(
+		'-h', '--help',
+		dest='help',
+		help='Show this help message',
+		action='store_true')
+	parser.add_argument(
+		'-o', '--orchestrate',
+		dest='arguments',
+		help='Provide task for the orchestrator (Default: Provide jarvis \
+		control command)',
+		required=False,
+		default=sys.argv[1:],
+		#remove -o or --orchestrate option and send as orchestrate command
+		const=['orchestrate'] + list([arg for arg in sys.argv[1:] \
+			if arg != '-o' and arg != '--orchestrate']),
+		action='store_const')
+	return parser
+
 def main():
-	handle_command(sys.argv[1:])
-	
+	parser = create_jarvis_parser()
+	args, rem_args = parser.parse_known_args(sys.argv[1:])
+	if args.help and len(args.command) == 0:
+		print_help(parser)
+	elif not args.help and len(args.command) == 0: 
+		print 'What can I do for you?'
+	else: handle_command(args.arguments + rem_args)
+	return 0
+		
 if __name__ == '__main__':
 	main()

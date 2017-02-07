@@ -1,22 +1,13 @@
 #!/usr/bin/python
 
-import subprocess
+import json
+import urllib2
 import argparse
-import urllib
-import uuid
-import yaml
-import os
-from urlparse import urlparse
+import register
+import subprocess
 
-GITHUB_DEFAULT_REPO = 'https://github.com/lahsivjar/jarvis-kube-modules.git'
-GITHUB_RAW_CONTENT_URL = 'https://raw.githubusercontent.com'
-GITHUB_DEFAULT_BRANCH = 'master'
-
-DEFAULT_DEPLOYMENT_PATH = 'deployment/deployment.yaml'
-DEFAULT_SERVICE_PATH = 'deployment/service.yaml'
-DEFAULT_INGRESS_PATH = 'deployment/ingress.yaml'
-
-DEFAULT_TEMP_DIR = '/tmp'
+from .. import util
+from .. import config
 
 def available_arguments():
 	return [
@@ -27,7 +18,7 @@ def available_arguments():
 			'nargs': '?'
 		},
 		{
-			'flags': ('-r', '--repo-url'),
+			'flags': ('-u', '--repo-url'),
 			'help': 'The git repo to clone the module from'
 		},
 		{
@@ -37,85 +28,88 @@ def available_arguments():
 		{
 			'flags': ('-l', '--local'),
 			'help': 'Deploy a local module'
+		},
+		{
+			'flags': ('-r', '--register'),
+			'help': 'Register the module after deploy',
+			'default': config.get_config('deploy.default.should_register'),
+			'const': True,
+			'action': 'store_const',
+			'required': False
 		}
 	]
 
-def get_raw_content_url(target, username, repo_name, branch_name, path):
-	return GITHUB_RAW_CONTENT_URL + '/' + username + '/' + repo_name + '/' + branch_name + '/' + path + '/' + target
-
-def make_dirs(filename):
-	if not os.path.exists(os.path.dirname(filename)):
-		try:
-			os.makedirs(os.path.dirname(filename))
-		except OSError as exc: # Guard against race condition
-			if exc.errno != errno.EEXIST:
-				raise
-
-def get_repo_data(repo_url):
-	url = urlparse(repo_url)
-	username = url.path.split('/')[1]
-	repo_name = url.path.split('/')[2][:-4]
-	return (username, repo_name)
-
-def run(args):
+def run(args, work_dir):
 	if args.repo_url is None and args.module_path is None:
 		print 'No deploy target found'
-		return
+		return 1
 	
-	repo_url = args.repo_url if args.repo_url is not None else GITHUB_DEFAULT_REPO
-	branch_name = args.branch if args.branch is not None else GITHUB_DEFAULT_BRANCH
-	module_path = args.module_path if args.module_path is not None else ''
+	repo_url = args.repo_url if args.repo_url is not None else config.get_config('deploy.default.repo')
+	branch_name = args.branch if args.branch is not None else config.get_config('deploy.default.branch')
+	module_path = args.module_path if args.module_path is not None else config.get_config('deploy.default.module_path')
+	should_register = args.register
 
-	build_source = repo_url + '#' + branch_name
-	build_source += (':' + module_path if module_path is not '' else '')
+	build_source = ''.join([repo_url, '#', branch_name])
+	build_source = ''.join([build_source, (':' + module_path if module_path is not '' else '')])
 
-	username, repo_name = get_repo_data(repo_url)
+	deployment_url = util.get_github_raw_content_url(config.get_config('deploy.default.deployment_yaml_path'), repo_url, branch_name, module_path)
+	service_url = util.get_github_raw_content_url(config.get_config('deploy.default.service_yaml_path'), repo_url, branch_name, module_path)
+	ingress_url = util.get_github_raw_content_url(config.get_config('deploy.default.ingress_yaml_path'), repo_url, branch_name, module_path)
+
+	deployment_file_path = ''.join([work_dir, '/deployment.yaml'])
+	service_file_path = ''.join([work_dir, '/service.yaml'])
+	ingress_file_path = ''.join([work_dir, '/ingress.yaml'])
 	
-	deployment_path = get_raw_content_url(DEFAULT_DEPLOYMENT_PATH, username, repo_name, branch_name, module_path)
-	service_path = get_raw_content_url(DEFAULT_SERVICE_PATH, username, repo_name, branch_name, module_path)
-	ingress_path = get_raw_content_url(DEFAULT_INGRESS_PATH, username, repo_name, branch_name, module_path)
-
-	tmp_dir = uuid.uuid4().hex
+	if should_register:
+		registry_url = util.get_github_raw_content_url(config.get_config('register.default.registry_yaml_path'), repo_url, branch_name, module_path)
+		registry_file_path = ''.join([work_dir, '/registry.yaml'])
 	
 	try:
 		print 'Downloading deployment files'
-		deployment_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + '/deployment.yaml'
-		make_dirs(deployment_file)
-		urllib.urlretrieve(deployment_path, deployment_file)
-		#TODO handle the case where deployment file does not exist or network fails
-	
-		service_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'service.yaml'
-		make_dirs(service_file)
-		urllib.urlretrieve(service_path, service_file)
-		#TODO handle if service file does not exist or network fails
 
-		ingress_file = DEFAULT_TEMP_DIR + '/' + tmp_dir + 'ingress.yaml'
-	        make_dirs(ingress_file)
-        	urllib.urlretrieve(ingress_path, ingress_file)
-	        #TODO handle if ingress file does not exist or network fails
+		MSG_DEPLOYMENT_FILE_NOT_FOUND = 'Deployment file: %s not found'
+		download_files = ((deployment_url, deployment_file_path, True, MSG_DEPLOYMENT_FILE_NOT_FOUND % config.get_config('deploy.default.deployment_yaml_path')),
+			(service_url, service_file_path, True, MSG_DEPLOYMENT_FILE_NOT_FOUND % config.get_config('deploy.default.service_yaml_path')),
+			(ingress_url, ingress_file_path, False))
+
+		if should_register:
+			download_files += download_files + ((registry_url, registry_file_path, False),)
+		
+		try:
+			success = util.retrieve_files(*download_files)
+		except RuntimeError:
+			return 1
+
 		print 'Deployment files downloaded'
 
-		with open(deployment_file, 'r') as stream:
-			try:
-				deployment_info = yaml.load(stream)
-				tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
-			except yaml.YAMLError as e:
-				print e	
+		deployment_info = util.convert_yaml_to_object(deployment_file_path)
+		tag = deployment_info['spec']['template']['spec']['containers'][0]['image']
 
-		print 'Building docker image from source %s with tag %s' % (build_source, tag)
-		subprocess.check_output(('docker build -t %s %s' % (tag, build_source)).split())
-		print 'Docker image created'
+		deploy(build_source, tag,
+			deployment_file_path,
+			service_file_path,
+			ingress_file_path if success[ingress_file_path] else None)
 
-		print 'Creating deployment'
-		subprocess.check_output(('kubectl create -f %s' % deployment_file).split())
-		print 'Deployment created'
+		if should_register:
+			register.register(registry_file_path)
 
-		print 'Creating service'
-		subprocess.check_output(('kubectl create -f %s' % service_file).split())
-		print 'Service created'
-
-		print 'Creating ingress'
-		subprocess.check_output(('kubectl create -f %s' % ingress_file).split())
-		print 'Ingress created'
 	except subprocess.CalledProcessError as e:
-		print 'ERROR: ' , e.output
+		print 'ERROR: ' , e
+
+def deploy(build_source, tag, deployment_file_path, service_file_path, ingress_file_path):
+	print 'Building docker image from source %s with tag %s' % (build_source, tag)
+	subprocess.check_output(('docker build -t %s %s' % (tag, build_source)).split())
+	print 'Docker image created'
+
+	print 'Creating deployment'
+	subprocess.check_output(('kubectl create -f %s' % deployment_file_path).split())
+	print 'Deployment created'
+
+	print 'Creating service'
+	subprocess.check_output(('kubectl create -f %s' % service_file_path).split())
+	print 'Service created'
+
+	if ingress_file_path is not None:
+		print 'Creating ingress'
+		subprocess.check_output(('kubectl create -f %s' % ingress_file_path).split())
+		print 'Ingress created'
