@@ -1,0 +1,9 @@
+---
+- name: "Install Jarvis System"
+  hosts: jarvis-kube-master
+  vars:
+    system_module_namespace: jarvis-system
+  tasks:
+  - name: "Install system modules"
+    debug: msg="found {{item}}
+    with_fileglob: ../../essentials/jarvis-system/*
