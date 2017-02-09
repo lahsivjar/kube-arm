@@ -1,0 +1,27 @@
+- name: "Get module paths"
+  stat:  
+    path: "{{ item.split('/')[1:] | join('/') }}deployment"
+  register: deployment_dir_path
+  with_lines: ls -d ../{{ path }}*/
+
+- name: "Copy modules to master"
+  copy:
+    src: "{{ item.item }}/deployment/"
+    dest: "{{ ansible_env.HOME }}/{{ item.item.split('/')[-2] }}"
+    force: yes
+  when: item.stat.exists and item.stat.isdir
+  with_items: deployment_dir_path.results
+
+- name: "Create modules"
+  command: "kubectl create -f {{ ansible_env.HOME }}/{{ item.item.split('/')[-2] }}"
+  register: command_result
+  failed_when: "'AlreadyExists' not in command_result.stderr and 'created' not in command_result.stdout"
+  when: item.stat.exists and item.stat.isdir
+  with_items: deployment_dir_path.results
+
+- name: "Cleaning up"
+  file:
+    path: "{{ ansible_env.HOME }}/{{ item.item.split('/')[-2] }}"
+    state: absent
+  when: item.stat.exists and item.stat.isdir
+  with_items: deployment_dir_path.results  

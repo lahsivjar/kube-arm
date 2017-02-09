@@ -3,3 +3,4 @@
 - include: ./tasks/kube-init.yaml
 - include: ./tasks/pod-flannel-init.yaml
 - include: ./tasks/pod-loadbalancer-init.yaml
+- include: ./tasks/jarvis-system-install.yaml

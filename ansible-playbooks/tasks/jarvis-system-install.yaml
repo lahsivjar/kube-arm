@@ -1,0 +1,20 @@
+---
+- name: "Install Jarvis System"
+  hosts: jarvis-kube-master
+  vars:
+    system_module_namespace: jarvis-system
+    system_module_path: ../../essentials/jarvis-system/
+  tasks:
+  - name: "Create namespace"
+    command: "kubectl create namespace {{ system_module_namespace }}"
+    register: command_result
+    failed_when: "'AlreadyExists' not in command_result.stderr and 'created' not in command_result.stdout" #ignoring namespace already exists error
+
+  - name: "Create namespace context"
+    command: "kubectl config set-context system --namespace={{ system_module_namespace }}"
+
+  - name: "Use namespace context"
+    command: "kubectl config use-context system"
+
+  - name: "Install system modules"
+    include: subtasks/deploy.yaml path={{ system_module_path }}
