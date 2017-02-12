@@ -3,10 +3,10 @@
   become: true
   become_method: sudo
   roles:
-  - reset-cluster/worker
+  - reset-cluster
 
 - hosts: jarvis-kube-master
   become: true
   become_method: sudo
   roles:
-  - reset-cluster/master
+  - reset-cluster

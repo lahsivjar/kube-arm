@@ -1,3 +1,0 @@
----
-- name: Reset kubeadm for master
-  command: kubeadm reset
