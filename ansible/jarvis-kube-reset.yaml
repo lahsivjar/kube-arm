@@ -1,0 +1,12 @@
+---
+- hosts: jarvis-kube-workers
+  become: true
+  become_method: sudo
+  roles:
+  - reset-cluster/worker
+
+- hosts: jarvis-kube-master
+  become: true
+  become_method: sudo
+  roles:
+  - reset-cluster/master

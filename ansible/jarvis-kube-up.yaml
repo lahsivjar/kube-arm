@@ -1,0 +1,18 @@
+---
+- hosts: jarvis-kube
+  become: true
+  become_method: sudo
+  roles:
+  - install-kube
+
+- hosts: jarvis-kube-master
+  become: true
+  become_method: sudo
+  roles:
+  - init-cluster/master
+
+- hosts: jarvis-kube-workers
+  become: true
+  become_method: sudo
+  roles:
+  - init-cluster/worker

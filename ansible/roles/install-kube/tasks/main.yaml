@@ -1,0 +1,15 @@
+---
+- name: Add GPG key for official kube
+  apt_key:
+    url: "https://packages.cloud.google.com/apt/doc/apt-key.gpg"
+    state: present
+- name: Add the kube package to sources
+  apt_repository:
+    repo: "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+    state: present
+    filename: kubernetes
+- name: Update repository cache and install kubeadm
+  apt:
+    name: kubeadm
+    update_cache: yes
+    state: present
