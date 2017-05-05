@@ -1,0 +1,3 @@
+---
+- name: Join master node with the generated token.
+  command: kubeadm join --token={{ kube_join_token }} {{ master_ip_address }}

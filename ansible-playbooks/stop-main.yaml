@@ -1,2 +1,0 @@
-# Runs all plays to reset kubernetes cluster and perform cleanup
-- include: ./tasks/kube-reset.yaml
