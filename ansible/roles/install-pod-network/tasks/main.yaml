@@ -1,0 +1,15 @@
+---
+- name: Copy kube-flannel configuration file
+  copy:
+    src: kube-flannel.yaml
+    dest: "{{ ansible_env.HOME }}/kube-flannel.yaml"
+    force: yes
+- name: Copy kube-flannel-rbac configuration file
+  copy:
+    src: kube-flannel-rbac.yaml
+    dest: "{{ ansible_env.HOME }}/kube-flannel-rbac.yaml"
+    force: yes
+- name: Create pod network [kube-flannel]
+  command: kubectl apply -f "{{ ansible_env.HOME }}/kube-flannel.yaml"
+- name: Create pod network [kube-flannel-rbac]
+  command: kubectl apply -f "{{ ansible_env.HOME }}/kube-flannel-rbac.yaml"

@@ -1,0 +1,23 @@
+---
+- name: Create kube config directory
+  file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+- name: Copy configuration file
+  become: true
+  become_method: sudo
+  command: "cp /etc/kubernetes/admin.conf {{ ansible_env.HOME }}/.kube/config"
+- name: Register user identity
+  command: id -u
+  register: user_id
+- name: Register group id
+  command: id -g
+  register: group_id
+- name: Own configuration file
+  become: true
+  become_method: sudo
+  file:
+    path: "{{ ansible_env.HOME }}/.kube/config"
+    owner: "{{ user_id.stdout }}"
+    group: "{{ group_id.stdout }}"
+    mode: "u=rw,g=r,o=r"
