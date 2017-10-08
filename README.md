@@ -1,6 +1,6 @@
 # kube-arm
 
-Provides easy deployment for kubernetes cluster on ARM architecture (example Raspberry Pi). The setup is streamlined and automated for the most part and provides developers with hassle free management of the cluser.
+Provides easy deployment for kubernetes cluster on ARM architecture (example Raspberry Pi). The setup is streamlined and automated for the most part and provides developers with hassle free management of the cluster.
 
 ## How it works
 
