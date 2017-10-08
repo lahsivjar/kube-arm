@@ -1,2 +1,2 @@
 kube_join_token: "{{ hostvars['black-pearl']['kube_join_token'].stdout }}"
-master_ip_address: "{{ hostvars['black-pearl']['master_ip_address'] }}"
+master_apiserver_address: "{{ hostvars['black-pearl']['master_apiserver_address'] }}"

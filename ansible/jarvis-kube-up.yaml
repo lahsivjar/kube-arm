@@ -11,6 +11,11 @@
   roles:
   - init-cluster/master
 
+- hosts: jarvis-kube-master
+  roles:
+  - init-cluster/master/post-init
+  - install-pod-network
+
 - hosts: jarvis-kube-workers
   become: true
   become_method: sudo
