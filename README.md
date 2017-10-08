@@ -15,10 +15,10 @@ kube-arm uses [Ansible](http://docs.ansible.com/ansible/latest/index.html) for a
 
 ### Installing
 
-* Clone kube-arm into a control PC (we will be executing ansible playbooks on this PC)
-* Install ansible on the control PC. For installation steps check [ansible docs](http://docs.ansible.com/ansible/latest/intro_installation.html)
-* Prepare the hosts file. You can refer to sample [hosts.sample](hosts.sample) for help.
-* Run the playbook cluster-start.yaml
+* Clone kube-arm into a control PC (we will be executing ansible playbooks on this PC).
+* Install ansible on the control PC. For installation steps check [ansible docs](http://docs.ansible.com/ansible/latest/intro_installation.html).
+* Prepare the hosts file. You can refer to sample [hosts](hosts.sample) for help.
+* Run the playbook cluster-start.yaml:
 ```
 ansible-playbook -i hosts cluster-start.yaml
 ```
