@@ -1,11 +1,11 @@
 ---
-- hosts: jarvis-kube-workers
+- hosts: kube-workers
   become: true
   become_method: sudo
   roles:
   - reset-cluster
 
-- hosts: jarvis-kube-master
+- hosts: kube-master
   become: true
   become_method: sudo
   roles:
