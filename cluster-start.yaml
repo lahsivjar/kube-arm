@@ -1,22 +1,22 @@
 ---
-- hosts: jarvis-kube
+- hosts: kube
   become: true
   become_method: sudo
   roles:
   - install-kube
 
-- hosts: jarvis-kube-master
+- hosts: kube-master
   become: true
   become_method: sudo
   roles:
   - init-cluster/master
 
-- hosts: jarvis-kube-master
+- hosts: kube-master
   roles:
   - init-cluster/master/post-init
   - install-pod-network
 
-- hosts: jarvis-kube-workers
+- hosts: kube-workers
   become: true
   become_method: sudo
   roles:

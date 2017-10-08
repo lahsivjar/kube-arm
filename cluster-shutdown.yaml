@@ -1,6 +1,6 @@
 ---
 - name: "Shutdown slave nodes"
-  hosts: jarvis-kube-workers
+  hosts: kube-workers
   become: true
   become_method: sudo
   tasks:
@@ -8,7 +8,7 @@
     command: shutdown -h +1 "Server shutdown initiated, will shutdown in 60 seconds"
 
 - name: "Shutdown master node"
-  hosts: jarvis-kube-master
+  hosts: kube-master
   become: true
   become_method: sudo
   tasks:
