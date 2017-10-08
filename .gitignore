@@ -1,4 +1,7 @@
 *.pyc
+*.retry
 **/build/
 **/dist/
 **.egg-info/
+
+hosts

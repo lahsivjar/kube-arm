@@ -1,7 +1,0 @@
-flask
-cherrypy
-enum
-requests
-voluptuous
-redis
-grequests
