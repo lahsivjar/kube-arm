@@ -33,6 +33,9 @@ ansible-playbook -i hosts cluster-start.yaml
 
 * [Raspberry Pi 3 Model B](https://www.raspberrypi.org) - Single board ARM based computer
 * [HypriotOS 4.4.39-hypriotos-v7](https://blog.hypriot.com) - Docker Pirates with ARMed explosives
+* [kubernetes client-version 1.8.0, server-version 1.8.0](https://kubernetes.io) - System for automating deployment, scaling and management of containerized applications
+* [kubeadm v1.8.0](https://kubernetes.io/docs/admin/kubeadm/) - Tool for kubernetes administration
+* [Ansible 2.2.0.0](http://docs.ansible.com/ansible/latest/intro.html) - IT automation system
 
 ## License
 
