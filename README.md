@@ -18,9 +18,9 @@ kube-arm uses [Ansible](http://docs.ansible.com/ansible/latest/index.html) for a
 * Clone kube-arm into a control PC (we will be executing ansible playbooks on this PC).
 * Install ansible on the control PC. For installation steps check [ansible docs](http://docs.ansible.com/ansible/latest/intro_installation.html).
 * Prepare the hosts file. You can refer to sample [hosts](hosts.sample) for help.
-* Run the playbook cluster-start.yaml:
+* Run the playbook cluster-init.yaml:
 ```
-ansible-playbook -i hosts cluster-start.yaml
+ansible-playbook -i hosts cluster-init.yaml
 ```
 
 ## Built With
@@ -35,7 +35,7 @@ ansible-playbook -i hosts cluster-start.yaml
 * [HypriotOS 4.4.39-hypriotos-v7](https://blog.hypriot.com) - Docker Pirates with ARMed explosives
 * [kubernetes client-version 1.8.0, server-version 1.8.0](https://kubernetes.io) - System for automating deployment, scaling and management of containerized applications
 * [kubeadm v1.8.0](https://kubernetes.io/docs/admin/kubeadm/) - Tool for kubernetes administration
-* [Ansible 2.2.0.0](http://docs.ansible.com/ansible/latest/intro.html) - IT automation system
+* [Ansible 2.4.0.0](http://docs.ansible.com/ansible/latest/intro.html) - IT automation system
 
 ## License
 

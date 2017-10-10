@@ -1,0 +1,24 @@
+---
+- hosts: kube
+  become: true
+  become_method: sudo
+  roles:
+  - install-kube
+
+- hosts: kube-master
+  become: true
+  become_method: sudo
+  roles:
+  - init-cluster/master
+
+- hosts: kube-master
+  roles:
+  - set-fact-master-address
+  - init-cluster/master/post-init
+  - install-pod-network
+
+- hosts: kube-workers
+  become: true
+  become_method: sudo
+  roles:
+  - init-cluster/worker

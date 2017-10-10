@@ -1,0 +1,10 @@
+---
+- fail:
+    msg: "TARGET_NODE variable is undefined, it must be passed to indicate the node name to shutdown"
+  when: TARGET_NODE is undefined
+- fail:
+    msg: "TARGET_NODE must be a valid node in kube group, please check hosts file"
+  when: TARGET_NODE not in groups['kube']
+- fail:
+    msg: "Cannot scaledown with kube-master as TARGET_NODE, please select a worker node"
+  when: TARGET_NODE in groups['kube-master']

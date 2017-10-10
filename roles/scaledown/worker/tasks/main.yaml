@@ -1,0 +1,5 @@
+---
+- name: Reset kubeadm
+  command: kubeadm reset
+  tags:
+    - worker

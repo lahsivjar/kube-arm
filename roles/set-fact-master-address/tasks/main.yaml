@@ -1,0 +1,7 @@
+---
+- name: Find cluster server address
+  command: kubectl config view -o jsonpath='{.clusters[?(@.name == "kubernetes")].cluster.server}'
+  register: cluster_server_address
+- name: Register master apiserver address
+  set_fact:
+    master_apiserver_address: "{{ cluster_server_address.stdout|urlsplit('netloc') }}"

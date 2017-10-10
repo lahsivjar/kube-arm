@@ -1,0 +1,5 @@
+---
+- name: Get a valid join token from kubeadm
+  shell: kubeadm token list | awk '{ print $1 }' | tail -1
+  register: kube_join_token
+  

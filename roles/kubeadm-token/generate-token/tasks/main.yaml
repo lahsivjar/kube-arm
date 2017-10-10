@@ -1,0 +1,4 @@
+---
+- name: Generate a token
+  command: kubeadm token generate
+  register: kube_join_token

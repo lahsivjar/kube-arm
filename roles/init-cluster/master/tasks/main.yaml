@@ -1,10 +1,6 @@
 ---
-- name: Generate a token
-  command: kubeadm token generate
-  register: kube_join_token
-- name: Register master apiserver address
-  set_fact:
-    master_apiserver_address: "{{ ansible_eth0.ipv4.address }}:{{ APISERVER_BIND_PORT }}"
+- include_role:
+    name: kubeadm-token/generate-token
 - name: Initialize kube adm
   command: kubeadm init --token {{ kube_join_token.stdout }} \
              --pod-network-cidr {{ POD_NETWORK_CIDR }} \

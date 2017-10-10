@@ -1,0 +1,9 @@
+---
+- name: Drain target node
+  command: kubectl drain {{ TARGET_NODE }} --delete-local-data --force --ignore-daemonsets
+  tags:
+    - master
+- name: Delete target node
+  command: kubectl delete node {{ TARGET_NODE }}
+  tags:
+    - master

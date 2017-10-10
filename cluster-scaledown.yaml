@@ -1,0 +1,14 @@
+---
+- hosts: localhost
+  roles:
+  - scaledown/verify
+
+- hosts: kube-master
+  roles:
+  - scaledown/master
+
+- hosts: "{{ TARGET_NODE }}"
+  become: true
+  become_method: sudo
+  roles:
+  - scaledown/worker

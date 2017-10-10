@@ -1,22 +1,19 @@
 ---
-- hosts: kube
-  become: true
-  become_method: sudo
+- hosts: localhost
   roles:
-  - install-kube
+  - scaleup/verify
 
 - hosts: kube-master
   become: true
   become_method: sudo
   roles:
-  - init-cluster/master
+  - kubeadm-token/get-valid-token
 
 - hosts: kube-master
   roles:
-  - init-cluster/master/post-init
-  - install-pod-network
+  - set-fact-master-address
 
-- hosts: kube-workers
+- hosts: "{{ TARGET_NODE }}"
   become: true
   become_method: sudo
   roles:
