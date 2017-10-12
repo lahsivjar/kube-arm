@@ -2,6 +2,7 @@
 - hosts: kube-workers
   become: true
   become_method: sudo
+  gather_facts: false
   roles:
   - shutdown
   tags:
@@ -10,6 +11,7 @@
 - hosts: kube-master
   become: true
   become_method: sudo
+  gather_facts: false
   roles:
   - shutdown
   tags:
