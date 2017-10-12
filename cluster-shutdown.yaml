@@ -1,16 +1,12 @@
 ---
-- name: "Shutdown slave nodes"
-  hosts: kube-workers
+- hosts: kube-workers
   become: true
   become_method: sudo
-  tasks:
-  - name: "Halt after 1 minute"
-    command: shutdown -h +1 "Server shutdown initiated, will shutdown in 60 seconds"
+  roles:
+  - shutdown
 
-- name: "Shutdown master node"
-  hosts: kube-master
+- hosts: kube-master
   become: true
   become_method: sudo
-  tasks:
-  - name: "Halt after 1 minute"
-    command: shutdown -h +1 "Server shutdown initiated, will shutdown in 60 seconds"
+  roles:
+  - shutdown

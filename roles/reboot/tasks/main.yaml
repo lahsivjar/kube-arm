@@ -1,0 +1,3 @@
+---
+- name: "Reboot after 1 minute"
+  command: shutdown -r +1 "Server reboot initiated in 60 seconds"
