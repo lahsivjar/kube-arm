@@ -4,9 +4,13 @@
   become_method: sudo
   roles:
   - reset-cluster
+  tags:
+  - workers
 
 - hosts: kube-master
   become: true
   become_method: sudo
   roles:
   - reset-cluster
+  tags:
+  - master

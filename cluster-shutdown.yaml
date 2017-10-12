@@ -4,9 +4,13 @@
   become_method: sudo
   roles:
   - shutdown
+  tags:
+  - workers
 
 - hosts: kube-master
   become: true
   become_method: sudo
   roles:
   - shutdown
+  tags:
+  - master

@@ -6,9 +6,13 @@
 - hosts: kube-master
   roles:
   - scaledown/master
+  tags:
+  - master
 
 - hosts: "{{ TARGET_NODE }}"
   become: true
   become_method: sudo
   roles:
   - scaledown/worker
+  tags:
+  - workers

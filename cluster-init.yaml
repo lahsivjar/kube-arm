@@ -10,15 +10,21 @@
   become_method: sudo
   roles:
   - init-cluster/master
+  tags:
+  - master
 
 - hosts: kube-master
   roles:
   - set-fact-master-address
   - init-cluster/master/post-init
   - install-pod-network
+  tags:
+  - master
 
 - hosts: kube-workers
   become: true
   become_method: sudo
   roles:
   - init-cluster/worker
+  tags:
+  - workers

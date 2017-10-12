@@ -8,13 +8,19 @@
   become_method: sudo
   roles:
   - kubeadm-token/get-valid-token
+  tags:
+  - master
 
 - hosts: kube-master
   roles:
   - set-fact-master-address
+  tags:
+  - master
 
 - hosts: "{{ TARGET_NODE }}"
   become: true
   become_method: sudo
   roles:
   - init-cluster/worker
+  tags:
+  - workers

@@ -5,6 +5,8 @@
   become_method: sudo
   roles:
   - reboot
+  tags:
+  - workers
 
 - name: "Reboot master node"
   hosts: kube-master
@@ -12,3 +14,5 @@
   become_method: sudo
   roles:
   - reboot
+  tags:
+  - master
