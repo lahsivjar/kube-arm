@@ -15,12 +15,17 @@
 
 - hosts: kube-master
   roles:
-  - set-fact-master-address
   - init-cluster/master/post-init
   - install-pod-network
-  - kubeadm-token/get-valid-token
   tags:
   - master
+
+- hosts: kube-master
+  roles:
+  - set-fact-master-address
+  - kubeadm-token/get-valid-token
+  tags:
+  - workers
 
 - hosts: kube-workers
   become: true
