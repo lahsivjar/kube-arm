@@ -1,0 +1,3 @@
+---
+- name: "Halt after 1 minute"
+  command: shutdown -h +1 "Server shutdown initiated, will shutdown in 60 seconds"
