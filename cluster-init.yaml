@@ -18,6 +18,7 @@
   - set-fact-master-address
   - init-cluster/master/post-init
   - install-pod-network
+  - kubeadm-token/get-valid-token
   tags:
   - master
 

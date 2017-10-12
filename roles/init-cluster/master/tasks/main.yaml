@@ -2,6 +2,6 @@
 - include_role:
     name: kubeadm-token/generate-token
 - name: Initialize kube adm
-  command: kubeadm init --token {{ kube_join_token.stdout }} \
+  command: kubeadm init --token {{ kube_join_token }} \
              --pod-network-cidr {{ POD_NETWORK_CIDR }} \
              --apiserver-bind-port {{ APISERVER_BIND_PORT}}

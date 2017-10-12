@@ -1,4 +1,7 @@
 ---
 - name: Generate a token
   command: kubeadm token generate
-  register: kube_join_token
+  register: join_token
+- name: Register kubernetes join token on master only
+  set_fact:
+    kube_join_token: "{{ join_token.stdout }}"
