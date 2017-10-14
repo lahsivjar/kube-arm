@@ -1,6 +1,6 @@
 ---
 - include_role:
-    name: kubeadm-token/generate-token
+    name: kubeadm-token/generate-pseudo-token
 - name: Initialize kube adm
   command: kubeadm init --token {{ kube_join_token }} \
              --pod-network-cidr {{ POD_NETWORK_CIDR }} \
