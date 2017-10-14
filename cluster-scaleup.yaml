@@ -21,6 +21,7 @@
   become: true
   become_method: sudo
   roles:
+  - install-kube
   - init-cluster/worker
   tags:
   - workers
