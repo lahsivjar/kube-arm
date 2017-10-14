@@ -2,11 +2,19 @@
 - name: Get a valid join token from kubeadm
   become: true
   become_method: sudo
-  shell: kubeadm token list | awk '{ print $1 }' | tail -1
-  register: join_token
+  shell: kubeadm token list | grep -v "TOKEN" | awk '{ print $1 }'
+  register: stale_join_token
+
+- name: Create a valid token with 1 hour ttl
+  become: true
+  become_method: sudo
+  shell: kubeadm token create --groups system:bootstrappers:kubeadm:default-node-token --ttl 1h
+  register: new_join_token
+  when: stale_join_token.stdout == ""
+
 - name: Register kubernetes join token for all worker nodes
   set_fact:
-    kube_join_token: "{{ join_token.stdout }}"
+    kube_join_token: "{{ (new_join_token.skipped | default(False)) | ternary(stale_join_token.stdout, new_join_token.stdout) }}"
   delegate_to: "{{ item }}"
   delegate_facts: True
   with_items: "{{ groups['kube-workers'] }}"
