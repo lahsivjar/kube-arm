@@ -1,0 +1,14 @@
+---
+- name: Get CA certificate hash
+  shell: openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | \
+     openssl rsa -pubin -outform der 2>/dev/null | \
+     openssl dgst -sha256 -hex | \
+     sed 's/^.* //'
+  register: local_cert_hash
+
+- name: Register ca certification hash on all worker nodes
+  set_fact:
+    ca_cert_hash: "sha256:{{ local_cert_hash.stdout }}"
+  delegate_to: "{{ item }}"
+  delegate_facts: True
+  with_items: "{{ groups['kube-workers'] }}"

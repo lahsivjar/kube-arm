@@ -24,6 +24,7 @@
   roles:
   - set-fact-master-address
   - kubeadm-token/get-valid-token
+  - get-ca-cert-hash
   tags:
   - workers
 
