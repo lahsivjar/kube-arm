@@ -1,3 +1,6 @@
 ---
 - name: Join master node with the generated token.
-  command: kubeadm join --token={{ kube_join_token }} {{ master_apiserver_address }}
+  command: kubeadm join \
+    --token={{ kube_join_token }} \
+    --discovery-token-ca-cert-hash={{ ca_cert_hash }} \
+    {{ master_apiserver_address }}
