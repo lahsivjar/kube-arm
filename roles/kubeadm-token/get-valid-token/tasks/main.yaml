@@ -2,13 +2,13 @@
 - name: Get a valid join token from kubeadm
   become: true
   become_method: sudo
-  shell: kubeadm token list | grep -v "TOKEN" | awk '{ print $1 }'
+  shell: kubeadm token list | grep "{{ TOKEN_GROUP }}" | awk '{ print $1 }'
   register: stale_join_token
 
 - name: Create a valid token with 1 hour ttl
   become: true
   become_method: sudo
-  shell: kubeadm token create --groups system:bootstrappers:kubeadm:default-node-token --ttl 1h
+  shell: kubeadm token create --groups {{ TOKEN_GROUP }} --ttl 1h
   register: new_join_token
   when: stale_join_token.stdout == ""
 
