@@ -1,8 +1,20 @@
 ---
+- fail:
+    msg: "Loadbalancer node is not defined"
+  when: loadbalancer_node is not defined
+
+- fail:
+    msg: "Loadbalancer node must be a valid node in kube-workers group"
+  when: loadbalancer_node not in groups['kube-workers']
+
+- name: "Label loadbalancer node"
+  command: kubectl label node {{ loadbalancer_node }} nginx-controller=traefik --overwrite
+
 - name: Copy deployment configuration file
   copy:
     src: traefik-deployment.yaml
     dest: "{{ ansible_env.HOME }}/traefik-deployment.yaml"
     force: yes
+
 - name: Create deployment
   command: kubectl apply -f "{{ ansible_env.HOME }}/traefik-deployment.yaml"
