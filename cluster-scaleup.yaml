@@ -14,8 +14,10 @@
 - hosts: kube-master
   roles:
   - set-fact-master-address
+  - kubeadm-token/get-valid-token
+  - get-ca-cert-hash
   tags:
-  - master
+  - workers
 
 - hosts: "{{ TARGET_NODE }}"
   become: true
