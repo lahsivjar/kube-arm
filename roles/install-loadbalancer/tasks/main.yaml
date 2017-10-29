@@ -1,8 +1,0 @@
----
-- name: Copy deployment configuration file
-  copy:
-    src: traefik-deployment.yaml
-    dest: "{{ ansible_env.HOME }}/traefik-deployment.yaml"
-    force: yes
-- name: Create deployment
-  command: kubectl apply -f "{{ ansible_env.HOME }}/traefik-deployment.yaml"
