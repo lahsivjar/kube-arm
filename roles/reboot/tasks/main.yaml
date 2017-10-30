@@ -1,3 +1,19 @@
 ---
-- name: "Reboot after 1 minute"
-  command: shutdown -r +1 "Server reboot initiated in 60 seconds"
+- name: Rebooting
+  shell: sleep 1 && /sbin/shutdown -r now
+  async: 1
+  poll: 0
+
+- name: Wait for reboot
+  pause:
+    seconds: 2
+
+- name: Wait for server to resurrect
+  become: false
+  local_action: wait_for
+  args:
+    host: "{{ ansible_default_ipv4.address }}"
+    port: 22
+    state: started
+    delay: 10
+    timeout: 120

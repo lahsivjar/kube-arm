@@ -1,0 +1,7 @@
+---
+# @see https://github.com/kubernetes/kubernetes/issues/45022
+- name: Update sysctl file to accept forward ruleset in iptables
+  sysctl:
+    name: "net.ipv4.ip_forward"
+    value: 1
+    state: present

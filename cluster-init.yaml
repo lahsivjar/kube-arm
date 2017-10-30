@@ -3,6 +3,8 @@
   become: true
   become_method: sudo
   roles:
+  - iptables-patch
+  - reboot
   - install-kube
 
 - hosts: kube-master
