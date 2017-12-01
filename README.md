@@ -17,10 +17,11 @@ kube-arm uses [Ansible](http://docs.ansible.com/ansible/latest/index.html) for a
 * Setup ssh keys for all nodes:
   * Generate public/private rsa key pair for each node.
   * Copy control PC public ssh key to each node.
-```
-# Copy for all nodes
-ssh-copy-id pirate@<node-ip>
-```
+
+      ```
+      # Copy for all nodes
+      ssh-copy-id pirate@<node-ip>
+      ```
 
 ### Initialising kubernetes cluster using kube-arm 
 
@@ -28,9 +29,54 @@ ssh-copy-id pirate@<node-ip>
 * Install ansible on the control PC. For installation steps check [ansible docs](http://docs.ansible.com/ansible/latest/intro_installation.html).
 * Prepare the hosts.ini file. You can refer to sample [hosts](hosts_sample.ini) for help.
 * Run the playbook cluster-init.yaml:
-```
-ansible-playbook -i hosts.ini cluster-init.yaml
-```
+
+    ```
+    ansible-playbook -i hosts.ini cluster-init.yaml
+    ```
+
+## Examples
+Most of the playbooks are self explanatory. In this section examples are presented for playbooks which requires some additional steps or parameters to be executed successfully.
+
+1. Install ingress controller (traefik): If `ingress_controller_node` variable is defined in `hosts.ini` when `cluster-init` playbook is run then ingress controller is installed as part of that playbook. It can also be installed separately by:
+    1. Define the variable `ingress_controller_node` in `hosts.ini` with the node name on which ingress controller will be installed under `kube:vars` section
+
+        ```
+        [kube:vars]
+        ingress_controller_node=kube-02
+        ```
+    2. Run the playbook
+
+        ```
+        ansible-playbook -i hosts.ini install-ingress-controller.yaml
+        ```
+2. Add a new worker node to the cluster
+    1. Define the new node in `hosts.ini` under `kube-workers`
+
+        ```
+        kube-05 ansible_host=192.168.1.19 ansible_user=pirate
+        ```
+    2. Run the playbook with the newly added node as target node
+
+        ```
+        ansible-playbook -i hosts.ini cluster-scaleup.yaml --extra-vars "TARGET_NODE=kube-05"
+        ```
+3. Remove a node from the cluster
+    1. Run playbook with the name of the node that is to be removed
+
+        ```
+        ansible-playbook -i hosts.ini cluster-scaledown.yaml --extra-vars "TARGET_NODE=kube-05"
+        ```
+    2. Remove the entry for the `TARGET_NODE` from `hosts.ini`
+4. `master` or `worker` specfic tasks can be run from a particular playbook using tags `master` and `workers` respectively
+
+    ```
+    # Will only reset worker nodes
+    ansible-playbook -i hosts_sample.ini cluster-reset.yaml --tags=workers
+    ```
+    ```
+    # Initialize only master node
+    ansible-playbook -i hosts.ini cluster-init.yaml --tags=master
+    ```
 
 ## Built With
 
