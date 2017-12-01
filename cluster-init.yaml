@@ -37,3 +37,7 @@
   - init-cluster/worker
   tags:
   - workers
+
+- hosts: kube-master
+  roles:
+  - { role: install-ingress-controller, when: ingress_controller_node is defined }
