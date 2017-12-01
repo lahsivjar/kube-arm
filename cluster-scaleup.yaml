@@ -2,6 +2,8 @@
 - hosts: localhost
   roles:
   - scaleup/verify
+  tags:
+  - always
 
 - hosts: kube-master
   become: true

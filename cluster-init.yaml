@@ -6,6 +6,8 @@
   - iptables-patch
   - reboot
   - install-kube
+  tags:
+  - always
 
 - hosts: kube-master
   become: true
