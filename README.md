@@ -67,6 +67,16 @@ Most of the playbooks are self explanatory. In this section examples are present
         ansible-playbook -i hosts.ini cluster-scaledown.yaml --extra-vars "TARGET_NODE=kube-05"
         ```
     2. Remove the entry for the `TARGET_NODE` from `hosts.ini`
+4. `master` or `worker` specfic tasks can be run from a particular playbook using tags `master` and `workers` respectively
+
+    ```
+    # Will only reset worker nodes
+    ansible-playbook -i hosts_sample.ini cluster-reset.yaml --tags=workers
+    ```
+    ```
+    # Initialize only master node
+    ansible-playbook -i hosts.ini cluster-init.yaml --tags=master
+    ```
 
 ## Built With
 
