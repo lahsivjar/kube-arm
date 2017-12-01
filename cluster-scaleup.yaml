@@ -23,6 +23,8 @@
   become: true
   become_method: sudo
   roles:
+  - iptables-patch
+  - reboot
   - install-kube
   - init-cluster/worker
   tags:
