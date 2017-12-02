@@ -19,8 +19,8 @@
 
 - hosts: kube-master
   roles:
-  - init-cluster/master/post-init
-  - install-pod-network
+  - { role: init-cluster/master/post-init }
+  - { role: kube-objects, target_module: flannel }
   tags:
   - master
 
@@ -40,6 +40,5 @@
   tags:
   - workers
 
-- hosts: kube-master
-  roles:
-  - { role: install-ingress-controller, when: ingress_controller_node is defined }
+- import_playbook: install-ingress-controller.yaml
+  when: ingress_controller_node is defined
