@@ -1,0 +1,8 @@
+---
+- fail:
+    msg: Ingress controller node is not defined
+  when: ingress_controller_node is not defined
+
+- fail:
+    msg: Ingress controller node must be a valid node in kube-workers group
+  when: ingress_controller_node not in groups['kube-workers']

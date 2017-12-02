@@ -1,0 +1,35 @@
+- fail:
+    msg: Target module is not defined
+  when: target_module is not defined
+
+- name: Register target module folder stat
+  local_action: stat path={{ role_path }}/files/{{ target_module }}
+  register: test_module_config
+
+- fail:
+    msg: "Folder for target module {{ target_module }} does not exist"
+  when: not (test_module_config.stat.exists and test_module_config.stat.isdir)
+
+- name: Register remote target path
+  set_fact:
+    target_remote_dir: "{{ ansible_env.HOME }}/{{ target_module }}"
+
+- name: Copy all files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ target_remote_dir }}/"
+    force: yes
+  with_fileglob: "{{ target_module }}/*.yaml"
+
+- name: Register target yaml files on remote
+  command: "find {{ target_remote_dir }} -type f -name '*.yaml'"
+  register: target_yaml_list
+
+- name: Create kubernetes objects
+  command: kubectl apply -f "{{ item }}"
+  with_items: "{{ target_yaml_list.stdout_lines }}"
+
+- name: Clean up
+  file:
+    path: "{{ target_remote_dir }}"
+    state: absent
