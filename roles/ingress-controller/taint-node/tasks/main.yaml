@@ -1,3 +1,4 @@
 ---
 - name: Label loadbalancer node
-  command: kubectl label node {{ ingress_controller_node }} nginx-controller=traefik --overwrite
+  command: kubectl label node {{ item }} nginx-controller=traefik --overwrite
+  with_items: "{{ ingress_controller_node }}"
